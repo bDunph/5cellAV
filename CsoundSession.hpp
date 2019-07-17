@@ -23,7 +23,7 @@ public:
 	void startThread();
 	void resetSession(std::string const &csdFileName);
 	void stopPerformance();
-	void mainLoop();
+	void realTimeControl();
 
 };
 

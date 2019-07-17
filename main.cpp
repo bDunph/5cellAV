@@ -79,6 +79,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos){
     	cameraFront = glm::normalize(front);	
 }
 
+
 void ProcessInput(GLFWwindow *window){
 	
 	float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
@@ -90,6 +91,8 @@ void ProcessInput(GLFWwindow *window){
         	cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         	cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;	
+	
+	
 
 	if(GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)){
 		glfwSetWindowShouldClose(window, 1);
@@ -99,11 +102,15 @@ void ProcessInput(GLFWwindow *window){
 int main(int argc, char **argv){
 
 //************************************************************
-	//start Csound thread and loop
+	//Csound performance thread
 	std::string csdName = "";
+	MYFLT* pVal;
 	if(argc > 1) csdName = argv[1];
 	CsoundSession *session = new CsoundSession(csdName);
-	session->mainLoop();
+	if(session->GetChannelPtr(pVal, "qValue", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
+		std::cout << "GetChannelPtr could not get the qValue input" << std::endl;
+		return 1;
+	}
 //************************************************************
 
 	bool logStarted = restart_gl_log();
@@ -495,6 +502,10 @@ int main(int argc, char **argv){
 		//glm::vec3 camPos = glm::vec3(camX, 0.0f, camZ);
 		//viewMatrix = glm::lookAt(camPos, cameraTarget, cameraUp);
 
+		//send to csound
+		*pVal = cameraPos.x + 10.0f;
+		//std::cout << *pVal << std::endl;
+
 		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);	
 
 		//rotation around W axis
@@ -544,6 +555,8 @@ int main(int argc, char **argv){
 		lastFrame = currentFrame;
 	}
 
+	//stop csound
+	session->stopPerformance();
 	//close GL context and any other GL resources
 	glfwTerminate();
 	return 0;

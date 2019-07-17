@@ -27,51 +27,48 @@ void CsoundSession::stopPerformance(){
 	Reset();
 };
 
-void CsoundSession::mainLoop(){
+void CsoundSession::realTimeControl(){
 	std::string s;
-	bool loop = true;
-	while(loop){
-		std::cout << std::endl << "l)oad csd; e)vent; r)ewind; t)oggle pause; s)top; p)lay; q)uit: ";
-		char c = std::cin.get();
-		switch(c) {
-			case 'l':
-				std::cout << "Enter the name of csd file:";
-				std::cin >> s;
-				resetSession(s);
-				break;
+	std::cout << std::endl << "l)oad csd; e)vent; r)ewind; t)oggle pause; s)top; p)lay; q)uit: ";
+	char c = std::cin.get();
+	switch(c) {
+		case 'l':
+			std::cout << "Enter the name of csd file:";
+			std::cin >> s;
+			resetSession(s);
+			break;
 
-			case 'e':
-				std::cout << "Enter a score event:";
-				std::cin.ignore(1000, '\n');
-				std::getline(std::cin, s);
-				m_pt->InputMessage(s.c_str());
-				break;
+		case 'e':
+			std::cout << "Enter a score event:";
+			std::cin.ignore(1000, '\n');
+			std::getline(std::cin, s);
+			m_pt->InputMessage(s.c_str());
+			break;
 
-			case 'r':
-				RewindScore();
-				break;
+		case 'r':
+			RewindScore();
+			break;
 
-			case 't':
-				if(m_pt) m_pt->TogglePause();
-				break;
+		case 't':
+			if(m_pt) m_pt->TogglePause();
+			break;
 
-			case 's':
-				stopPerformance();
-				break;
+		case 's':
+			stopPerformance();
+			break;
 
-			case 'p':
-				resetSession("");
-				break;
+		case 'p':
+			resetSession("");
+			break;
 
-			case 'q':
-				if(m_pt){
-					m_pt->Stop();
-					m_pt->Join();
-				}
-				loop = false;
-				break;
+		case 'q':
+			if(m_pt){
+				m_pt->Stop();
+				m_pt->Join();
+			}
+			break;
 
-		}
+	
 		std::cout << std::endl;
 	}
 };
