@@ -33,17 +33,20 @@ ifreq22 init p16
 ifreq23 init p17
 ifreq24 init p18
 ifreq25 init p19
-;iQ21    init p20
-iQ22    init p20
-iQ23	init p21
-iQ24	init p22
-iQ25	init p23
+iQ21    init p20
+iQ22    init p21
+iQ23	init p22
+iQ24	init p23
+iQ25	init p24
 
 ;get input vals
-kQval chnget "qValue"
+;kQval chnget "qValue"
+kPulseVal chnget "pulse"
 
 ; to simulate the shock between the excitator and the resonator
-ashock  mpulse  3,0.01
+ashock  mpulse  1,2
+
+;aSig	phasor	440
 
 aexc1	mode 	ashock,	ifreq11,	iQ11
 aexc1 = aexc1*iamp
@@ -54,22 +57,21 @@ aexc2 = aexc2*iamp
 aexc3   mode 	ashock,	ifreq13,	iQ13
 aexc3 = aexc3*iamp
 
-aexc4   mode 	ashock,	ifreq14,	iQ14
+aexc4   mode 	ashock, ifreq14,	iQ14
 aexc4 = aexc4*iamp
 
 aexc5   mode 	ashock,	ifreq15,	iQ15
 aexc5 = aexc5*iamp
 
-
 aexc = (aexc1+aexc2+aexc3+aexc4+aexc5)/5
 
 ;"Contact" condition : when aexc reaches 0, the excitator looses 
 ;contact with the resonator, and stops "pushing it"
-aexc limit aexc,0,5*iamp 
+aexc limit aexc,0,2*iamp 
 
 ; 5modes resonator
 
-ares1	mode	aexc,	ifreq21,	kQval	
+ares1	mode	aexc,	ifreq21,	iQ21	
 
 ares2	mode	aexc,	ifreq22,	iQ22
 
@@ -86,18 +88,22 @@ outs  aexc+ares,aexc+ares
 
 endin
 
+instr 2 ;test instrument for chnget
+
+kc   chnget    "cutoff"
+a1   oscil     ampdb(70), kc 
+out       a1
+
+endin
 
 </CsInstruments>
 <CsScore>
 ;p1	p2	p3	p4	p5	p6	p7	p8	p9	p10	p11	p12	p13	p14	p15	p16	p17	p18	p19	p20	p21	p22	p23	p24
 ;With a metallic excitator
 
-i1 	0 	20 	70	500	980	1024	1260	2480	500  	360  	660	350	250	220	320  	462	680	840	  	48	62	74	12
-
-;i1 	+	8	70	1000	1500	2000	2500	3000	12  	8  	24	48	96	110	590  	2000	3200	5240	12  	4	8	128	512
-
-;i1 	+ 	8 	70	500	980	1024	1260	2480	500  	360  	660	350	250	220	320  	462	680	840	24  	48	62	74	12
-
+i1 	0 	90 	50	50	70	82	80	90	1000  	720  	850	700	820	440	882  	660	220	442	500	400	350	130	200
+i1	5	90	50	1000	3000	1000	3000	1000	12	8	12	8	12	80	180	80	180	80	8	3	8	3	8
+;i2	0	60
 
 </CsScore>
 </CsoundSynthesizer>

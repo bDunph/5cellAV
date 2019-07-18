@@ -107,7 +107,7 @@ int main(int argc, char **argv){
 	MYFLT* pVal;
 	if(argc > 1) csdName = argv[1];
 	CsoundSession *session = new CsoundSession(csdName);
-	if(session->GetChannelPtr(pVal, "qValue", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
+	if(session->GetChannelPtr(pVal, "pulse", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
 		std::cout << "GetChannelPtr could not get the qValue input" << std::endl;
 		return 1;
 	}
@@ -503,7 +503,8 @@ int main(int argc, char **argv){
 		//viewMatrix = glm::lookAt(camPos, cameraTarget, cameraUp);
 
 		//send to csound
-		*pVal = cameraPos.x + 10.0f;
+		float sendVal = cameraPos.y;
+		*pVal = (MYFLT) sendVal;
 		//std::cout << *pVal << std::endl;
 
 		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);	
