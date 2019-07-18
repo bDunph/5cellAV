@@ -19,18 +19,18 @@ void main() {
 	//vec4 rotatedPos = rotZW * scaledPos;
 
 	float dist = 2.0;
-	float xPos3D = position4D.x / (dist - position4D.w);
-	float yPos3D = position4D.y / (dist - position4D.w);
-	float zPos3D = position4D.z / (dist - position4D.w);
+	float xPos3D = position4D.x * dist / (dist - position4D.w);
+	float yPos3D = position4D.y * dist / (dist - position4D.w);
+	float zPos3D = position4D.z * dist / (dist - position4D.w);
 
 	vec4 position3D = scaleMat * vec4(xPos3D, yPos3D, zPos3D, 1.0);
 	
 	fragPos_worldSpace = vec3(modelMat * position3D).xyz;
 
 	//project normal to 3D
-	float xNorm3D = normal4D.x / (dist - normal4D.w);
-	float yNorm3D = normal4D.y / (dist - normal4D.w);
-	float zNorm3D = normal4D.z / (dist - normal4D.w);
+	float xNorm3D = normal4D.x * dist / (dist - normal4D.w);
+	float yNorm3D = normal4D.y * dist / (dist - normal4D.w);
+	float zNorm3D = normal4D.z * dist / (dist - normal4D.w);
 	
 	vec3 normal3D = vec3(xNorm3D, yNorm3D, zNorm3D);
 	vertNormal_worldSpace = mat3(transpose(inverse(modelMat))) * normal3D;

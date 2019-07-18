@@ -422,7 +422,7 @@ int main(int argc, char **argv){
 	glm::mat4 modelMatrix;
 
 	// projection matrix setup	
-	projectionMatrix = glm::perspective(60.0f, (float)g_gl_width / (float)g_gl_height, 0.1f, 1000.0f);
+	projectionMatrix = glm::perspective(60.0f, (float)g_gl_width / (float)g_gl_height, 0.1f, 10000.0f);
 
 	GLint projMatLoc = glGetUniformLocation(shader_program, "projMat");
 	GLint viewMatLoc = glGetUniformLocation(shader_program, "viewMat");
@@ -449,9 +449,9 @@ int main(int argc, char **argv){
 
 	//scale matrix
 	glm::mat4 scaleMatrix = glm::mat4(
-		50.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 50.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 50.0f, 0.0f,
+		1000.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1000.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1000.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
 	);
 
