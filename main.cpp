@@ -171,14 +171,132 @@ int main(int argc, char **argv){
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_CULL_FACE);
 
+//******************************************************************************************
+// Matrices & Light Positions
+//*******************************************************************************************
+	
+	glm::mat4 projectionMatrix;
+	glm::mat4 viewMatrix;
+	glm::mat4 modelMatrix;
+
+	// projection matrix setup	
+	projectionMatrix = glm::perspective(60.0f, (float)g_gl_width / (float)g_gl_height, 0.1f, 10000.0f);
+
+	// variables for view matrix
+	cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
+	cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+	cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	//model matrix
+	modelMatrix = glm::mat4(1.0f);
+
+	//scale matrix
+	glm::mat4 scaleMatrix = glm::mat4(
+		1000.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1000.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1000.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+
+	
+	glm::vec3 lightPos = glm::vec3(0.0f, 1.0f, -0.2f); 
+	glm::vec3 lightPos2 = glm::vec3(0.0f, 1.0f, 0.5f);
+//****************************************************************************************************
+
+//**************************************************************************************************
+//	Ground Plane Setup
+//*********************************************************************************************
+	// Ground plane vertices
+	float groundVerts [12] = {
+		1.0f, 0.0f, -1.0f,
+		1.0f, 0.0f, 1.0f,
+		-1.0f, 0.0f, 1.0f,
+		-1.0f, 0.0f, -1.0f
+	};
+
+	unsigned int groundIndices [6] = {
+		0, 1, 3,
+		3, 1, 2
+	};
+
+	//Set up ground plane buffers
+	GLuint groundVAO;
+	glGenVertexArrays(1, &groundVAO);
+	glBindVertexArray(groundVAO);
+
+	GLuint groundVBO;
+	glGenBuffers(1, &groundVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, groundVBO);
+	glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), groundVerts, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	GLuint groundIndexBuffer;
+	glGenBuffers(1, &groundIndexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, groundIndexBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), groundIndices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	//load shaders
+	char* groundVertShader;
+	bool isGroundVertLoaded = load_shader("groundPlane.vert", groundVertShader);
+	if(!isGroundVertLoaded) return 1;
+
+	char* groundFragShader;
+	bool isGroundFragLoaded = load_shader("groundPlane.frag", groundFragShader);
+	if(!isGroundFragLoaded) return 1;
+
+	GLuint gvs = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(gvs, 1, &groundVertShader, NULL);
+	glCompileShader(gvs);
+	delete[] groundVertShader;
+	//check for compile errors
+	bool isGroundVertCompiled = shader_compile_check(gvs);
+	if(!isGroundVertCompiled) return 1;
+
+	GLuint gfs = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(gfs, 1, &groundFragShader, NULL);
+	glCompileShader(gfs);
+	delete[] groundFragShader;
+	//check for compile errors
+	bool isGroundFragCompiled = shader_compile_check(gfs);
+	if(!isGroundFragCompiled) return 1;
+	
+	GLuint groundPlaneShaderProg = glCreateProgram();
+	glAttachShader(groundPlaneShaderProg, gfs);
+	glAttachShader(groundPlaneShaderProg, gvs);
+	glLinkProgram(groundPlaneShaderProg);
+	bool didGroundShadersLink = shader_link_check(groundPlaneShaderProg);
+	if(!didGroundShadersLink) return 1;
+
+	//uniform setup
+	GLint ground_projMatLoc = glGetUniformLocation(groundPlaneShaderProg, "projMat");
+	GLint ground_viewMatLoc = glGetUniformLocation(groundPlaneShaderProg, "viewMat");
+	GLint ground_modelMatLoc = glGetUniformLocation(groundPlaneShaderProg, "modelMat");
+	GLint ground_scaleMatLoc = glGetUniformLocation(groundPlaneShaderProg, "scaleMat");	
+
+	GLint ground_lightPosLoc = glGetUniformLocation(groundPlaneShaderProg, "lightPos");
+	GLint ground_light2PosLoc = glGetUniformLocation(groundPlaneShaderProg, "light2Pos");
+
+	GLint ground_cameraPosLoc = glGetUniformLocation(groundPlaneShaderProg, "camPos");
+	
+	//only use during development as computationally expensive
+	bool validGroundProgram = is_valid(groundPlaneShaderProg);
+	if(!validGroundProgram){
+		fprintf(stderr, "ERROR: groundPlaneShaderProg not valid\n");
+		return 1;
+	}
+
+	glBindVertexArray(0);
+//***************************************************************************************************		
+		
+
+//*************************************************************************************************
+// 5cell Polytope Setup
+//*************************************************************************************************
 	/* specify 4D coordinates of 5-cell from https://en.wikipedia.org/wiki/5-cell */
-	/*float vertices [20] = {
-		2.0, 0.0, 0.0, 0.0,
-		0.0, 2.0, 0.0, 0.0,
-		0.0, 0.0, 2.0, 0.0,
-		0.0, 0.0, 0.0, 2.0,
-		GOLDRATIO, GOLDRATIO, GOLDRATIO, GOLDRATIO
-	};*/
 	/*float vertices [20] = {
 		1.0f/sqrt(10.0f), 1.0f/sqrt(6.0f), 1.0f/sqrt(3.0f), 1.0f,
 		1.0f/sqrt(10.0f), 1.0f/sqrt(6.0f), 1.0f/sqrt(3.0f), -1.0f,
@@ -284,22 +402,6 @@ int main(int argc, char **argv){
 		glm::vec4 back = glm::vec4(0.0, 0.0, 1.0, 0.0);	
 		glm::vec4 charm = glm::vec4(0.0, 0.0, 0.0, 1.0);	
 
-		/*glm::mat3 matA = glm::mat3(	vectorA.y, vectorB.y, vectorC.y,
-						vectorA.z, vectorB.z, vectorC.z,
-						vectorA.w, vectorB.w, vectorC.w);
-
-		glm::mat3 matB = glm::mat3(	vectorA.x, vectorB.x, vectorC.x,
-						vectorA.z, vectorB.z, vectorC.z,
-						vectorA.w, vectorB.w, vectorC.w);
-
-		glm::mat3 matC = glm::mat3(	vectorA.x, vectorB.x, vectorC.x,
-						vectorA.y, vectorB.y, vectorC.y,
-						vectorA.w, vectorB.w, vectorC.w);
-	
-		glm::mat3 matD = glm::mat3(	vectorA.x, vectorB.x, vectorC.x,
-						vectorA.y, vectorB.y, vectorC.y,
-						vectorA.z, vectorB.z, vectorC.z);*/
-
 		glm::mat3 matA = glm::mat3(	u1.y, u2.y, u3.y,
 						u1.z, u2.z, u3.z,
 						u1.w, u2.w, u3.w);
@@ -378,6 +480,8 @@ int main(int argc, char **argv){
 	glGenBuffers(1, &index);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 30 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 	
 	//GLuint lineIndex;
 	//glGenBuffers(1, &lineIndex);
@@ -416,55 +520,19 @@ int main(int argc, char **argv){
 	bool didShadersLink = shader_link_check(shader_program);
 	if(!didShadersLink) return 1;
 
-	//matrices
-	glm::mat4 projectionMatrix;
-	glm::mat4 viewMatrix;
-	glm::mat4 modelMatrix;
-
-	// projection matrix setup	
-	projectionMatrix = glm::perspective(60.0f, (float)g_gl_width / (float)g_gl_height, 0.1f, 10000.0f);
-
+	//uniforms for 4D shape
 	GLint projMatLoc = glGetUniformLocation(shader_program, "projMat");
 	GLint viewMatLoc = glGetUniformLocation(shader_program, "viewMat");
 	GLint modelMatLoc = glGetUniformLocation(shader_program, "modelMat");
 	GLint rotationZWLoc = glGetUniformLocation(shader_program, "rotZW");
 	GLint scaleMatLoc = glGetUniformLocation(shader_program, "scaleMat");	
-	//view matrix setup
-	//glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.5f);
-	//glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-	//glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-	//glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
 
-	//glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-	//glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-	
-	//glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
-
-	cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
-	cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-	cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
-	//model matrix
-	modelMatrix = glm::mat4(1.0f);
-
-	//scale matrix
-	glm::mat4 scaleMatrix = glm::mat4(
-		1000.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1000.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1000.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
-
-	//uniforms
 	GLint lightPosLoc = glGetUniformLocation(shader_program, "lightPos");
-	glm::vec3 lightPos = glm::vec3(0.0f, 1.0f, -0.2f); 
-
 	GLint light2PosLoc = glGetUniformLocation(shader_program, "light2Pos");
-	glm::vec3 lightPos2 = glm::vec3(0.0f, 1.0f, 0.5f);
 
 	GLint cameraPosLoc = glGetUniformLocation(shader_program, "camPos");
 
-	print_all(shader_program);
+	//print_all(shader_program);
 
 	//only use during development as computationally expensive
 	bool validProgram = is_valid(shader_program);
@@ -472,6 +540,9 @@ int main(int argc, char **argv){
 		fprintf(stderr, "ERROR: shader program not valid\n");
 		return 1;
 	}
+
+	glBindVertexArray(0);
+//***********************************************************************************************************
 
 	//workaround for macOS Mojave bug
 	bool needDraw = true;
@@ -517,6 +588,10 @@ int main(int argc, char **argv){
 			0.0f, 0.0f, sin(glfwGetTime()), cos(glfwGetTime())
 		);
 
+				
+		// draw 4D polytope	
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
 		glUseProgram(shader_program);
 		// glUniform1f(glGetUniformLocation(shader_program, "iGlobalTime"), global_time);
 
@@ -529,10 +604,27 @@ int main(int argc, char **argv){
 		glUniform3f(light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
 		glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
 
-		glBindVertexArray(vao);
 		// draw 5-cell using index buffer
 		glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
 		//glDrawElements(GL_LINES, 20 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	
+		// draw ground plane second 
+		glBindVertexArray(groundVAO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, groundIndexBuffer); 
+		glUseProgram(groundPlaneShaderProg);
+
+		glUniformMatrix4fv(ground_projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
+		glUniformMatrix4fv(ground_viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+		glUniformMatrix4fv(ground_modelMatLoc, 1, GL_FALSE, &modelMatrix[0][0]);
+		glUniformMatrix4fv(ground_scaleMatLoc, 1, GL_FALSE, &scaleMatrix[0][0]);
+		glUniform3f(ground_lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+		glUniform3f(ground_light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
+		glUniform3f(ground_cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+
+		glDrawElements(GL_TRIANGLES, 6 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 
 		//update other events like input handling
