@@ -67,7 +67,7 @@ aexc = (aexc1+aexc2+aexc3+aexc4+aexc5)/5
 
 ;"Contact" condition : when aexc reaches 0, the excitator looses 
 ;contact with the resonator, and stops "pushing it"
-aexc limit aexc,0,2*iamp 
+aexc limit aexc,0,3*iamp 
 
 ; 5modes resonator
 
@@ -83,12 +83,37 @@ ares5	mode	aexc,	ifreq25,	iQ25
 
 ares = (ares1+ares2+ares3+ares4+ares5)/5
 
+aOut = aexc + ares
+
 ;display aexc+ares,p3
-outs  aexc+ares,aexc+ares
+;outs  aexc+ares,aexc+ares
 
 endin
 
-instr 2 ;test instrument for chnget
+instr 2 ; spatialisation of sound source in 3D space
+
+aOut = aOut + 0.000001 * 0.000001
+kXpos chnget "xPos"
+kYpos chnget "yPos"
+kZpos chnget "zPos"
+
+idist = sqrt(kXpos^2 + kYpos^2 + kZpos^2)
+ift = 0
+imode = 1
+imdel = (4 + 1) * sqrt(12) / 340.0 ; (R + 1) * sqrt(H*H + W*W + D*D) / 340.0
+iovr = 2
+
+aW, aX, aY, aZ spat3d aOut, kXpos, kYpos, kZpos, idist, ift, imode, imdel, iovr
+aW = aW * 1.4142
+
+aL = aW + aY
+aR = aW - aY
+
+outs aL, aR
+
+endin
+
+instr 20 ;test instrument for chnget
 
 kc   chnget    "cutoff"
 a1   oscil     ampdb(70), kc 

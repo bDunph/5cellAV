@@ -82,7 +82,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos){
 
 void ProcessInput(GLFWwindow *window){
 	
-	float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
+	float cameraSpeed = 5.0f * deltaTime; // adjust accordingly
     	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         	cameraPos += cameraSpeed * cameraFront;
     	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -102,16 +102,28 @@ void ProcessInput(GLFWwindow *window){
 int main(int argc, char **argv){
 
 //************************************************************
-	//Csound performance thread
+//Csound performance thread
+//************************************************************
 	std::string csdName = "";
-	MYFLT* pVal;
 	if(argc > 1) csdName = argv[1];
 	CsoundSession *session = new CsoundSession(csdName);
-	if(session->GetChannelPtr(pVal, "pulse", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
-		std::cout << "GetChannelPtr could not get the qValue input" << std::endl;
+	MYFLT* xVal;
+	MYFLT* yVal;
+	MYFLT* zVal;
+	if(session->GetChannelPtr(xVal, "xPos", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
+		std::cout << "GetChannelPtr could not get the xPos input" << std::endl;
 		return 1;
 	}
-//************************************************************
+	if(session->GetChannelPtr(yVal, "yPos", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
+		std::cout << "GetChannelPtr could not get the yPos input" << std::endl;
+		return 1;
+	}	
+	if(session->GetChannelPtr(zVal, "zPos", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
+		std::cout << "GetChannelPtr could not get the zPos input" << std::endl;
+		return 1;
+	}
+
+	//************************************************************
 
 	bool logStarted = restart_gl_log();
 	assert(logStarted);
@@ -184,7 +196,7 @@ int main(int argc, char **argv){
 
 	// variables for view matrix
 	cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
-	cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+	cameraFront = glm::vec3(0.0f, 0.0f, 1.0f);
 	cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	//model matrix
@@ -574,11 +586,18 @@ int main(int argc, char **argv){
 		//viewMatrix = glm::lookAt(camPos, cameraTarget, cameraUp);
 
 		//send to csound
-		float sendVal = cameraPos.y;
-		*pVal = (MYFLT) sendVal;
+		//float sendVal = cameraPos.y;
+		//*pVal = (MYFLT) sendVal;
 		//std::cout << *pVal << std::endl;
 
 		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);	
+
+		//coords of vert0 to send to csound for spatialisation
+		glm::vec4 vert0Pos = glm::vec4(0.3162f, 0.4082f, 0.5774f, 1.0f);
+		glm::vec4 pos = projectionMatrix * viewMatrix * modelMatrix * vert0Pos;
+		*xVal = (MYFLT)pos.x;
+		*yVal = (MYFLT)pos.y;
+		*zVal = (MYFLT)pos.z;	
 
 		//rotation around W axis
 		glm::mat4 rotationZW = glm::mat4(
