@@ -107,23 +107,45 @@ int main(int argc, char **argv){
 	std::string csdName = "";
 	if(argc > 1) csdName = argv[1];
 	CsoundSession *session = new CsoundSession(csdName);
-	MYFLT* xVal;
-	MYFLT* yVal;
-	MYFLT* zVal;
-	if(session->GetChannelPtr(xVal, "xPos", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
-		std::cout << "GetChannelPtr could not get the xPos input" << std::endl;
+	MYFLT* vertexValues [15];
+	for(int i = 0; i < 5; i++){
+		std::string channelX = "xPos" + std::to_string(i);
+		const char* xPos = channelX.c_str();	
+		if(session->GetChannelPtr(vertexValues[3 * i], xPos, CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
+			std::cout << "GetChannelPtr could not get the xPos input" << std::endl;
+			return 1;
+		}
+		std::string channelY = "yPos" + std::to_string(i);
+		const char* yPos = channelY.c_str();
+		if(session->GetChannelPtr(vertexValues[(3 * i) + 1], yPos, CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
+			std::cout << "GetChannelPtr could not get the yPos input" << std::endl;
+			return 1;
+		}	
+		std::string channelZ = "zPos" + std::to_string(i);
+		const char* zPos = channelZ.c_str();
+		if(session->GetChannelPtr(vertexValues[(3 * i) + 2], zPos, CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
+			std::cout << "GetChannelPtr could not get the zPos input" << std::endl;
+			return 1;
+		}
+	}
+
+	MYFLT* testPos [3];
+	if(session->GetChannelPtr(testPos[0], "x", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
+		std::cout << "Error at test csound channel x" << std::endl;
 		return 1;
 	}
-	if(session->GetChannelPtr(yVal, "yPos", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
-		std::cout << "GetChannelPtr could not get the yPos input" << std::endl;
+	if(session->GetChannelPtr(testPos[1], "y", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
+		std::cout << "Error at test csound channel y" << std::endl;
 		return 1;
-	}	
-	if(session->GetChannelPtr(zVal, "zPos", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
-		std::cout << "GetChannelPtr could not get the zPos input" << std::endl;
+	}
+	if(session->GetChannelPtr(testPos[2], "z", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
+		std::cout << "Error at test csound channel z" << std::endl;
 		return 1;
 	}
 
-	//************************************************************
+		
+
+//************************************************************
 
 	bool logStarted = restart_gl_log();
 	assert(logStarted);
@@ -192,10 +214,10 @@ int main(int argc, char **argv){
 	glm::mat4 modelMatrix;
 
 	// projection matrix setup	
-	projectionMatrix = glm::perspective(60.0f, (float)g_gl_width / (float)g_gl_height, 0.1f, 10000.0f);
+	projectionMatrix = glm::perspective(45.0f, (float)g_gl_width / (float)g_gl_height, 0.1f, 100.0f);
 
 	// variables for view matrix
-	cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
+	cameraPos = glm::vec3(0.0f, 0.0f, -1.0f);
 	cameraFront = glm::vec3(0.0f, 0.0f, 1.0f);
 	cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -204,17 +226,162 @@ int main(int argc, char **argv){
 
 	//scale matrix
 	glm::mat4 scaleMatrix = glm::mat4(
-		1000.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1000.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1000.0f, 0.0f,
+		50.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 50.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 50.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
 	);
 
 	
-	glm::vec3 lightPos = glm::vec3(0.0f, 1.0f, -0.2f); 
-	glm::vec3 lightPos2 = glm::vec3(0.0f, 1.0f, 0.5f);
+	glm::vec3 lightPos = glm::vec3(-2.0f, -1.0f, -1.5f); 
+	glm::vec3 lightPos2 = glm::vec3(0.0f, 3.0f, 1.5f);
 //****************************************************************************************************
 
+//***************************************************************************************************
+// Sound Source Test Object
+//***************************************************************************************************
+
+	//Sound source vertices
+	float soundVerts [24] = {
+		//top left front	
+		-1.0f, 1.0f, -1.0f,
+		//bottom left front
+		-1.0f, -1.0f, -1.0f,
+		//bottom right front
+		1.0f, -1.0f, -1.0f,
+		//top right front
+		1.0f, 1.0f, -1.0f,
+		//top left back
+		-1.0f, 1.0f, 1.0f,
+		//bottom left back
+		-1.0f, -1.0f, 1.0f,
+		//bottom right back
+		1.0f, -1.0f, 1.0f,
+		//top right back
+		1.0f, 1.0f, 1.0f
+	};
+
+	unsigned int soundIndices [36] = {
+		//front face
+		0, 1, 2,
+		0, 2, 3,
+		//right face
+		3, 2, 6,
+		3, 6, 7,
+		//back face
+		7, 6, 5,
+		7, 5, 4,
+		//left face
+		4, 5, 1,
+		4, 1, 0,
+		//bottom face
+		5, 6, 2,
+		5, 2, 1,
+		//top face
+		4, 0, 3,
+		4, 3, 7
+	};
+
+	float soundObjNormals [24] = {
+		//top front left
+		-1.0f, 1.0f, -1.0f,
+		//bottom front left
+		-1.0f, -1.0f, -1.0f,
+		//bottom front right
+		1.0f, -1.0f, -1.0f,
+		//top front right
+		1.0f, 1.0f, -1.0f,
+		//top left back
+		-1.0f, 1.0f, 1.0f,
+		//bottom left back
+		-1.0f, -1.0f, 1.0f,
+		//bottom right back
+		1.0f, -1.0f, 1.0f,
+		//top right back
+		1.0f, 1.0f, 1.0f
+	};	
+
+	//Set up ground plane buffers
+	GLuint soundVAO;
+	glGenVertexArrays(1, &soundVAO);
+	glBindVertexArray(soundVAO);
+
+	GLuint soundVBO;
+	glGenBuffers(1, &soundVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, soundVBO);
+	glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(float), soundVerts, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	GLuint soundObjNormalVBO;
+	glGenBuffers(1, &soundObjNormalVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, soundObjNormalVBO);
+	glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(float), soundObjNormals, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	GLuint soundObjIndexBuffer;
+	glGenBuffers(1, &soundObjIndexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, soundObjIndexBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 36 * sizeof(unsigned int), soundIndices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	//load shaders
+	char* soundObjVertShader;
+	bool isSoundObjVertLoaded = load_shader("soundObj.vert", soundObjVertShader);
+	if(!isSoundObjVertLoaded) return 1;
+
+	char* soundObjFragShader;
+	bool isSoundObjFragLoaded = load_shader("soundObj.frag", soundObjFragShader);
+	if(!isSoundObjFragLoaded) return 1;
+
+	GLuint svs = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(svs, 1, &soundObjVertShader, NULL);
+	glCompileShader(svs);
+	delete[] soundObjVertShader;
+	//check for compile errors
+	bool isSoundObjVertCompiled = shader_compile_check(svs);
+	if(!isSoundObjVertCompiled) return 1;
+
+	GLuint sfs = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(sfs, 1, &soundObjFragShader, NULL);
+	glCompileShader(sfs);
+	delete[] soundObjFragShader;
+	//check for compile errors
+	bool isSoundObjFragCompiled = shader_compile_check(sfs);
+	if(!isSoundObjFragCompiled) return 1;
+	
+	GLuint soundObjShaderProg = glCreateProgram();
+	glAttachShader(soundObjShaderProg, sfs);
+	glAttachShader(soundObjShaderProg, svs);
+	glLinkProgram(soundObjShaderProg);
+	bool didSoundObjShadersLink = shader_link_check(soundObjShaderProg);
+	if(!didSoundObjShadersLink) return 1;
+
+	//uniform setup
+	GLint soundObj_projMatLoc = glGetUniformLocation(soundObjShaderProg, "projMat");
+	GLint soundObj_viewMatLoc = glGetUniformLocation(soundObjShaderProg, "viewMat");
+	GLint soundObj_modelMatLoc = glGetUniformLocation(soundObjShaderProg, "modelMat");
+	GLint soundObj_scaleMatLoc = glGetUniformLocation(soundObjShaderProg, "scaleMat");	
+
+	GLint soundObj_lightPosLoc = glGetUniformLocation(soundObjShaderProg, "lightPos");
+	GLint soundObj_light2PosLoc = glGetUniformLocation(soundObjShaderProg, "light2Pos");
+
+	GLint soundObj_cameraPosLoc = glGetUniformLocation(soundObjShaderProg, "camPos");
+	
+	//only use during development as computationally expensive
+	bool validSoundObjProgram = is_valid(soundObjShaderProg);
+	if(!validSoundObjProgram){
+		fprintf(stderr, "ERROR: soundObjShaderProg not valid\n");
+		return 1;
+	}
+
+	glBindVertexArray(0);
+		
 //**************************************************************************************************
 //	Ground Plane Setup
 //*********************************************************************************************
@@ -592,57 +759,91 @@ int main(int argc, char **argv){
 
 		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);	
 
-		//coords of vert0 to send to csound for spatialisation
-		glm::vec4 vert0Pos = glm::vec4(0.3162f, 0.4082f, 0.5774f, 1.0f);
-		glm::vec4 pos = projectionMatrix * viewMatrix * modelMatrix * vert0Pos;
-		*xVal = (MYFLT)pos.x;
-		*yVal = (MYFLT)pos.y;
-		*zVal = (MYFLT)pos.z;	
+
+		//coords of verts to send to csound for spatialisation
+		float projectionDistance = 2.0f;
+		glm::vec3 projectedVerts [5];
+		for(int i = 0; i < _countof(vertArray); i++){
+			float projectedPointX = (vertArray[i].x * projectionDistance) / (projectionDistance - vertArray[i].w); 	
+			float projectedPointY = (vertArray[i].y * projectionDistance) / (projectionDistance - vertArray[i].w); 	
+			float projectedPointZ = (vertArray[i].z * projectionDistance) / (projectionDistance - vertArray[i].w); 	
+ 	
+			projectedVerts[i] = glm::vec3(projectedPointX, projectedPointY, projectedPointZ);
+			
+			glm::vec4 pos = projectionMatrix * viewMatrix * modelMatrix * glm::vec4(projectedVerts[i], 1.0);
+			*vertexValues[i] = (MYFLT)pos.x;
+			*vertexValues[i + 1]  = (MYFLT)pos.y;
+			*vertexValues[i + 2] = (MYFLT)pos.z;
+		}
+	
+		glm::vec3 soundSource = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3 projSource = projectionMatrix * viewMatrix * modelMatrix * glm::vec4(soundSource, 1.0);
+		*testPos[0] = (MYFLT)projSource.x;
+		*testPos[1] = (MYFLT)projSource.y;
+		*testPos[2] = (MYFLT)projSource.z;
+
+	
 
 		//rotation around W axis
-		glm::mat4 rotationZW = glm::mat4(
-			1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, cos(glfwGetTime()), -sin(glfwGetTime()),
-			0.0f, 0.0f, sin(glfwGetTime()), cos(glfwGetTime())
-		);
+		//glm::mat4 rotationZW = glm::mat4(
+		//	1.0f, 0.0f, 0.0f, 0.0f,
+		//	0.0f, 1.0f, 0.0f, 0.0f,
+		//	0.0f, 0.0f, cos(glfwGetTime()), -sin(glfwGetTime()),
+		//	0.0f, 0.0f, sin(glfwGetTime()), cos(glfwGetTime())
+		//);
 
 				
 		// draw 4D polytope	
-		glBindVertexArray(vao);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
-		glUseProgram(shader_program);
-		// glUniform1f(glGetUniformLocation(shader_program, "iGlobalTime"), global_time);
-
-		glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
-		glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
-		glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, &modelMatrix[0][0]);
-		glUniformMatrix4fv(rotationZWLoc, 1, GL_FALSE, &rotationZW[0][0]);
-		glUniformMatrix4fv(scaleMatLoc, 1, GL_FALSE, &scaleMatrix[0][0]);
-		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-		glUniform3f(light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
-		glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+//		glBindVertexArray(vao);
+//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
+//		glUseProgram(shader_program);
+//
+//		glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
+//		glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+//		glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, &modelMatrix[0][0]);
+		//glUniformMatrix4fv(rotationZWLoc, 1, GL_FALSE, &rotationZW[0][0]);
+//		glUniformMatrix4fv(scaleMatLoc, 1, GL_FALSE, &scaleMatrix[0][0]);
+//		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+//		glUniform3f(light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
+//		glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
 
 		// draw 5-cell using index buffer
-		glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+//		glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
 		//glDrawElements(GL_LINES, 20 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+//		glBindVertexArray(0);
 	
 		// draw ground plane second 
-		glBindVertexArray(groundVAO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, groundIndexBuffer); 
-		glUseProgram(groundPlaneShaderProg);
+//		glBindVertexArray(groundVAO);
+//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, groundIndexBuffer); 
+//		glUseProgram(groundPlaneShaderProg);
+//
+//		glUniformMatrix4fv(ground_projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
+//		glUniformMatrix4fv(ground_viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+//		glUniformMatrix4fv(ground_modelMatLoc, 1, GL_FALSE, &modelMatrix[0][0]);
+//		glUniformMatrix4fv(ground_scaleMatLoc, 1, GL_FALSE, &scaleMatrix[0][0]);
+//		glUniform3f(ground_lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+//		glUniform3f(ground_light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
+//		glUniform3f(ground_cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+//
+//		glDrawElements(GL_TRIANGLES, 6 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+//		glBindVertexArray(0);
 
-		glUniformMatrix4fv(ground_projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
-		glUniformMatrix4fv(ground_viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
-		glUniformMatrix4fv(ground_modelMatLoc, 1, GL_FALSE, &modelMatrix[0][0]);
-		glUniformMatrix4fv(ground_scaleMatLoc, 1, GL_FALSE, &scaleMatrix[0][0]);
-		glUniform3f(ground_lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-		glUniform3f(ground_light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
-		glUniform3f(ground_cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+		//draw sound test object
+		glBindVertexArray(soundVAO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, soundObjIndexBuffer);
+		glUseProgram(soundObjShaderProg);
 
-		glDrawElements(GL_TRIANGLES, 6 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+		glUniformMatrix4fv(soundObj_projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
+		glUniformMatrix4fv(soundObj_viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+		glUniformMatrix4fv(soundObj_modelMatLoc, 1, GL_FALSE, &modelMatrix[0][0]);
+		glUniformMatrix4fv(soundObj_scaleMatLoc, 1, GL_FALSE, &scaleMatrix[0][0]);
+		glUniform3f(soundObj_lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+		glUniform3f(soundObj_light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
+		glUniform3f(soundObj_cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+
+		glDrawElements(GL_TRIANGLES, 36 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 

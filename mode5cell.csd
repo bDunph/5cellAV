@@ -41,7 +41,7 @@ iQ25	init p24
 
 ;get input vals
 ;kQval chnget "qValue"
-kPulseVal chnget "pulse"
+;kPulseVal chnget "pulse"
 
 ; to simulate the shock between the excitator and the resonator
 ashock  mpulse  1,2
@@ -88,36 +88,86 @@ aOut = aexc + ares
 ;display aexc+ares,p3
 ;outs  aexc+ares,aexc+ares
 
-endin
+;endin
 
-instr 2 ; spatialisation of sound source in 3D space
+;instr 2 ; spatialisation of sound source in 3D space
 
 aOut = aOut + 0.000001 * 0.000001
-kXpos chnget "xPos"
-kYpos chnget "yPos"
-kZpos chnget "zPos"
 
-idist = sqrt(kXpos^2 + kYpos^2 + kZpos^2)
-ift = 0
+kXpos0 chnget "xPos0"
+kYpos0 chnget "yPos0"
+kZpos0 chnget "zPos0"
+kXpos1 chnget "xPos1"
+kYpos1 chnget "yPos1"
+kZpos1 chnget "zPos1"
+kXpos2 chnget "xPos2"
+kYpos2 chnget "yPos2"
+kZpos2 chnget "zPos2"
+kXpos3 chnget "xPos3"
+kYpos3 chnget "yPos3"
+kZpos3 chnget "zPos3"
+kXpos4 chnget "xPos4"
+kYpos4 chnget "yPos4"
+kZpos4 chnget "zPos4"
+
+idist = sqrt(12) ; ****need to cahnge this***
+ift = 4
 imode = 1
 imdel = (4 + 1) * sqrt(12) / 340.0 ; (R + 1) * sqrt(H*H + W*W + D*D) / 340.0
 iovr = 2
 
-aW, aX, aY, aZ spat3d aOut, kXpos, kYpos, kZpos, idist, ift, imode, imdel, iovr
-aW = aW * 1.4142
+a0W, a0X, a0Y, a0Z spat3d aOut, kXpos0, kYpos0, kZpos0, idist, ift, imode, imdel, iovr
+a0W = a0W * 1.4142
+a0L = a0W + a0Y
+a0R = a0W - a0Y
 
-aL = aW + aY
-aR = aW - aY
+a1W, a1X, a1Y, a1Z spat3d aOut, kXpos1, kYpos1, kZpos1, idist, ift, imode, imdel, iovr
+a1W = a1W * 1.4142
+a1L = a1W + a1Y
+a1R = a1W - a1Y
 
-outs aL, aR
+a2W, a2X, a2Y, a2Z spat3d aOut, kXpos2, kYpos2, kZpos2, idist, ift, imode, imdel, iovr
+a2W = a2W * 1.4142
+a2L = a2W + a2Y
+a2R = a2W - a2Y
 
+a3W, a3X, a3Y, a3Z spat3d aOut, kXpos3, kYpos3, kZpos3, idist, ift, imode, imdel, iovr
+a3W = a3W * 1.4142
+a3L = a3W + a3Y
+a3R = a3W - a3Y
+
+a4W, a4X, a4Y, a4Z spat3d aOut, kXpos4, kYpos4, kZpos4, idist, ift, imode, imdel, iovr
+a4W = a4W * 1.4142
+a4L = a4W + a4Y
+a4R = a4W - a4Y
+
+aOutL = (a0L + a1L + a2L + a3L + a4L)/5
+aOutR = (a0R + a1R + a2R + a3R + a4R)/5
+
+outs	aOutL, aOutR
 endin
 
 instr 20 ;test instrument for chnget
 
-kc   chnget    "cutoff"
-a1   oscil     ampdb(70), kc 
-out       a1
+kx	chnget  "x"
+ky	chnget	"y" 
+kz	chnget	"z"
+
+a1   oscil     ampdb(70), 440 
+
+idistance = 1.0 ; ****need to cahnge this***
+ift = 1
+imode = 1
+imdel = 2;(4 + 1) * sqrt(12) / 340.0 ; (R + 1) * sqrt(H*H + W*W + D*D) / 340.0
+iovr = 2
+
+aW, aX, aY, aZ spat3d a1, kx, ky, kz, 1.0, 1, 1, 2, 2 
+aW = aW * 1.4142
+aL = aW + aY
+aR = aW - aY
+
+
+outs       aL, aR
 
 endin
 
@@ -126,8 +176,11 @@ endin
 ;p1	p2	p3	p4	p5	p6	p7	p8	p9	p10	p11	p12	p13	p14	p15	p16	p17	p18	p19	p20	p21	p22	p23	p24
 ;With a metallic excitator
 
-i1 	0 	90 	50	50	70	82	80	90	1000  	720  	850	700	820	440	882  	660	220	442	500	400	350	130	200
-i1	5	90	50	1000	3000	1000	3000	1000	12	8	12	8	12	80	180	80	180	80	8	3	8	3	8
+;i1 	0 	90 	50	50	70	82	80	90	1000  	720  	850	700	820	440	882  	660	220	442	500	400	350	130	200
+;i1	5	90	50	1000	3000	1000	3000	1000	12	8	12	8	12	80	180	80	180	80	8	3	8	3	8
+
+i20	0	90
+
 ;i2	0	60
 
 </CsScore>
