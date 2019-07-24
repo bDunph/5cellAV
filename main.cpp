@@ -10,6 +10,7 @@
 #include <ctime>
 #include <assert.h>
 #include <math.h>
+#include <cmath>
 #include <iostream>
 
 #include "log.h"
@@ -17,6 +18,7 @@
 #include "utils.h"
 
 #define GOLDRATIO 1.6180339887
+#define PI 3.14159265359
 
 #ifndef _countof
 #define _countof(x) (sizeof(x)/sizeof((x)[0]))
@@ -143,6 +145,20 @@ int main(int argc, char **argv){
 		return 1;
 	}
 
+	MYFLT* hrtfVals[3];
+	if(session->GetChannelPtr(hrtfVals[0], "azimuth", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
+		std::cout << "Error at hrtf azimuth" << std::endl;
+		return 1;
+	}
+	if(session->GetChannelPtr(hrtfVals[1], "elevation", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
+		std::cout << "Error at hrtf elevation" << std::endl;
+		return 1;
+	}
+	if(session->GetChannelPtr(hrtfVals[2], "distance", CSOUND_INPUT_CHANNEL | CSOUND_CONTROL_CHANNEL) != 0){
+		std::cout << "Error at hrtf distance" << std::endl;
+		return 1;
+	}
+	
 		
 
 //************************************************************
@@ -745,7 +761,6 @@ int main(int argc, char **argv){
 		//resize openGL elements
 		glViewport(0, 0, g_gl_width, g_gl_height);
 
-		/* draw stuff here */
 		
 		//float camX = sin(glfwGetTime()) * radius;
 		//float camZ = cos(glfwGetTime()) * radius;
@@ -759,6 +774,7 @@ int main(int argc, char **argv){
 
 		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);	
 
+		
 
 		//coords of verts to send to csound for spatialisation
 		float projectionDistance = 2.0f;
@@ -782,8 +798,32 @@ int main(int argc, char **argv){
 		*testPos[1] = (MYFLT)projSource.y;
 		*testPos[2] = (MYFLT)projSource.z;
 
-	
+		//calculate azimuth and elevation values for hrtf
+		
+		glm::vec3 viewerPos = cameraPos * cameraFront;
+		glm::vec3 soundPos = projSource;
 
+		//distance
+		float r = sqrt((pow((soundPos.x - viewerPos.x), 2)) + (pow((soundPos.y - viewerPos.y), 2)) + (pow((soundPos.z - viewerPos.z), 2)));
+		//std::cout << r << std::endl;	
+
+		//azimuth
+		float val = ((soundPos.x - viewerPos.x)/(soundPos.z - viewerPos.z));
+		float azimuth = atan(val);
+		azimuth *= (180.0f/PI); 	
+		//std::cout << azimuth << std::endl;
+
+		//elevation
+		float cosVal = (soundPos.y - viewerPos.y) / r;
+		float elevation = asin(cosVal);
+		elevation *= (180.0f/PI);		
+		//std::cout << elevation<< std::endl;
+
+		*hrtfVals[0] = (MYFLT)azimuth;
+		*hrtfVals[1] = (MYFLT)elevation;
+		*hrtfVals[2] = (MYFLT)r;
+
+		//std::cout << *hrtfVals[0] << std::endl;
 		//rotation around W axis
 		//glm::mat4 rotationZW = glm::mat4(
 		//	1.0f, 0.0f, 0.0f, 0.0f,
@@ -793,6 +833,10 @@ int main(int argc, char **argv){
 		//);
 
 				
+//**********************************************************************************************************
+// Draw Stuff Here
+//*********************************************************************************************************
+
 		// draw 4D polytope	
 //		glBindVertexArray(vao);
 //		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);

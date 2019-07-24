@@ -9,8 +9,8 @@
 <CsInstruments>
 
 ; Initialize the global variables.
-sr = 44100
-kr = 4410
+sr = 48000
+kr = 4800
 ksmps = 10
 nchnls = 2
 
@@ -83,7 +83,7 @@ ares5	mode	aexc,	ifreq25,	iQ25
 
 ares = (ares1+ares2+ares3+ares4+ares5)/5
 
-aOut = aexc + ares
+gaOut = aexc + ares
 
 ;display aexc+ares,p3
 ;outs  aexc+ares,aexc+ares
@@ -92,59 +92,59 @@ aOut = aexc + ares
 
 ;instr 2 ; spatialisation of sound source in 3D space
 
-aOut = aOut + 0.000001 * 0.000001
+;aOut = aOut + 0.000001 * 0.000001
 
-kXpos0 chnget "xPos0"
-kYpos0 chnget "yPos0"
-kZpos0 chnget "zPos0"
-kXpos1 chnget "xPos1"
-kYpos1 chnget "yPos1"
-kZpos1 chnget "zPos1"
-kXpos2 chnget "xPos2"
-kYpos2 chnget "yPos2"
-kZpos2 chnget "zPos2"
-kXpos3 chnget "xPos3"
-kYpos3 chnget "yPos3"
-kZpos3 chnget "zPos3"
-kXpos4 chnget "xPos4"
-kYpos4 chnget "yPos4"
-kZpos4 chnget "zPos4"
+;kXpos0 chnget "xPos0"
+;kYpos0 chnget "yPos0"
+;kZpos0 chnget "zPos0"
+;kXpos1 chnget "xPos1"
+;kYpos1 chnget "yPos1"
+;kZpos1 chnget "zPos1"
+;kXpos2 chnget "xPos2"
+;kYpos2 chnget "yPos2"
+;kZpos2 chnget "zPos2"
+;kXpos3 chnget "xPos3"
+;kYpos3 chnget "yPos3"
+;kZpos3 chnget "zPos3"
+;kXpos4 chnget "xPos4"
+;kYpos4 chnget "yPos4"
+;kZpos4 chnget "zPos4"
 
-idist = sqrt(12) ; ****need to cahnge this***
-ift = 4
-imode = 1
-imdel = (4 + 1) * sqrt(12) / 340.0 ; (R + 1) * sqrt(H*H + W*W + D*D) / 340.0
-iovr = 2
+;idist = sqrt(12) ; ****need to cahnge this***
+;ift = 4
+;imode = 1
+;imdel = (4 + 1) * sqrt(12) / 340.0 ; (R + 1) * sqrt(H*H + W*W + D*D) / 340.0
+;iovr = 2
 
-a0W, a0X, a0Y, a0Z spat3d aOut, kXpos0, kYpos0, kZpos0, idist, ift, imode, imdel, iovr
-a0W = a0W * 1.4142
-a0L = a0W + a0Y
-a0R = a0W - a0Y
-
-a1W, a1X, a1Y, a1Z spat3d aOut, kXpos1, kYpos1, kZpos1, idist, ift, imode, imdel, iovr
-a1W = a1W * 1.4142
-a1L = a1W + a1Y
-a1R = a1W - a1Y
-
-a2W, a2X, a2Y, a2Z spat3d aOut, kXpos2, kYpos2, kZpos2, idist, ift, imode, imdel, iovr
-a2W = a2W * 1.4142
-a2L = a2W + a2Y
-a2R = a2W - a2Y
-
-a3W, a3X, a3Y, a3Z spat3d aOut, kXpos3, kYpos3, kZpos3, idist, ift, imode, imdel, iovr
-a3W = a3W * 1.4142
-a3L = a3W + a3Y
-a3R = a3W - a3Y
-
-a4W, a4X, a4Y, a4Z spat3d aOut, kXpos4, kYpos4, kZpos4, idist, ift, imode, imdel, iovr
-a4W = a4W * 1.4142
-a4L = a4W + a4Y
-a4R = a4W - a4Y
-
-aOutL = (a0L + a1L + a2L + a3L + a4L)/5
-aOutR = (a0R + a1R + a2R + a3R + a4R)/5
-
-outs	aOutL, aOutR
+;a0W, a0X, a0Y, a0Z spat3d aOut, kXpos0, kYpos0, kZpos0, idist, ift, imode, imdel, iovr
+;a0W = a0W * 1.4142
+;a0L = a0W + a0Y
+;a0R = a0W - a0Y
+;
+;a1W, a1X, a1Y, a1Z spat3d aOut, kXpos1, kYpos1, kZpos1, idist, ift, imode, imdel, iovr
+;a1W = a1W * 1.4142
+;a1L = a1W + a1Y
+;a1R = a1W - a1Y
+;
+;a2W, a2X, a2Y, a2Z spat3d aOut, kXpos2, kYpos2, kZpos2, idist, ift, imode, imdel, iovr
+;a2W = a2W * 1.4142
+;a2L = a2W + a2Y
+;a2R = a2W - a2Y
+;
+;a3W, a3X, a3Y, a3Z spat3d aOut, kXpos3, kYpos3, kZpos3, idist, ift, imode, imdel, iovr
+;a3W = a3W * 1.4142
+;a3L = a3W + a3Y
+;a3R = a3W - a3Y
+;
+;a4W, a4X, a4Y, a4Z spat3d aOut, kXpos4, kYpos4, kZpos4, idist, ift, imode, imdel, iovr
+;a4W = a4W * 1.4142
+;a4L = a4W + a4Y
+;a4R = a4W - a4Y
+;
+;aOutL = (a0L + a1L + a2L + a3L + a4L)/5
+;aOutR = (a0R + a1R + a2R + a3R + a4R)/5
+;
+;outs	aOutL, aOutR
 endin
 
 instr 20 ;test instrument for chnget
@@ -166,22 +166,37 @@ aW = aW * 1.4142
 aL = aW + aY
 aR = aW - aY
 
-
 outs       aL, aR
 
 endin
+
+instr 30 ; test hrtf instrument
+
+kAzimuth	chnget	"azimuth"
+kElevation	chnget	"elevation"
+kSourceDist	chnget	"distance"
+
+aSig	oscil	ampdb(80),	440
+
+aleft,	aright	hrtfmove2	aSig,	kAzimuth,	kElevation,	"hrtf-48000-left.dat",	"hrtf-48000-right.dat"
+
+aL = aleft * 1 / (kSourceDist + 0.1)
+aR = aright * 1 / (kSourceDist + 0.1)
+
+outs	aL,	aR
+endin
+
 
 </CsInstruments>
 <CsScore>
 ;p1	p2	p3	p4	p5	p6	p7	p8	p9	p10	p11	p12	p13	p14	p15	p16	p17	p18	p19	p20	p21	p22	p23	p24
 ;With a metallic excitator
 
-;i1 	0 	90 	50	50	70	82	80	90	1000  	720  	850	700	820	440	882  	660	220	442	500	400	350	130	200
-;i1	5	90	50	1000	3000	1000	3000	1000	12	8	12	8	12	80	180	80	180	80	8	3	8	3	8
+i1 	0 	90 	50	50	70	82	80	90	1000  	720  	850	700	820	440	882  	660	220	442	500	400	350	130	200
+i1	5	90	50	1000	3000	1000	3000	1000	12	8	12	8	12	80	180	80	180	80	8	3	8	3	8
 
-i20	0	90
+;i20	0	90
 
-;i2	0	60
-
+i30	0	90
 </CsScore>
 </CsoundSynthesizer>
