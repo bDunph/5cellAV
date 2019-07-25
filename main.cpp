@@ -808,10 +808,11 @@ int main(int argc, char **argv){
 		//std::cout << r << std::endl;	
 
 		//azimuth
-		float val = ((soundPos.x - viewerPos.x)/(soundPos.z - viewerPos.z));
-		float azimuth = atan(val);
+		float valX = soundPos.x - viewerPos.x;
+		float valZ = soundPos.z - viewerPos.z;
+		float azimuth = atan2(valX, valZ);
 		azimuth *= (180.0f/PI); 	
-		//std::cout << azimuth << std::endl;
+		std::cout << azimuth << std::endl;
 
 		//elevation
 		float cosVal = (soundPos.y - viewerPos.y) / r;
