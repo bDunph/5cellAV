@@ -170,18 +170,66 @@ outs       aL, aR
 
 endin
 
-instr 30 ; test hrtf instrument
+instr 30 ; hrtf instrument
 
-kAzimuth	chnget	"azimuth"
-kElevation	chnget	"elevation"
-kSourceDist	chnget	"distance"
+S_AzimuthVals[] init 5
+S_ElevationVals[] init 5
+S_DistanceVals[] init 5
+
+iCount = 0
+loop:
+	S_VertNumber sprintf "%i", iCount
+
+	S_AzimuthChannel strcpy "azimuth"	
+	S_ChannelNameAz strcat S_AzimuthChannel, S_VertNumber
+	S_AzimuthVals[iCount] sprintf "%s", S_ChannelNameAz
+
+	S_ElevationChannel strcpy "elevation"
+	S_ChannelNameEl strcat S_ElevationChannel, S_VertNumber
+	S_ElevationVals[iCount] sprintf "%s", S_ChannelNameEl
+
+	S_DistanceChannel strcpy "distance"
+	S_ChannelNameDist strcat S_DistanceChannel, S_VertNumber
+	S_DistanceVals[iCount] sprintf "%s", S_ChannelNameDist
+
+	prints "S_AzimuthVals[%d] = %s\n", iCount, S_AzimuthVals[iCount]
+	prints "S_ElevationVals[%d] = %s\n", iCount, S_ElevationVals[iCount]
+	prints "S_DistanceVals[%d] = %s\n", iCount, S_DistanceVals[iCount]
+
+	loop_lt iCount, 1, 5, loop
+
 
 aSig	oscil	ampdb(80),	440
 
-aleft,	aright	hrtfmove2	aSig,	kAzimuth,	kElevation,	"hrtf-48000-left.dat",	"hrtf-48000-right.dat"
+kAzimuthVals[] init 5
+kElevationVals[] init 5
+kDistanceVals[] init 5
 
-aL = aleft * 1 / (kSourceDist + 0.1)
-aR = aright * 1 / (kSourceDist + 0.1)
+aRightSigs[] init 5
+aLeftSigs[] init 5 
+
+aL init 0
+aR init 0
+
+kCount = 0
+loop:
+
+	kAzimuthVals[kCount] chnget S_AzimuthVals[kCount]
+	kElevationVals[kCount] chnget S_ElevationVals[kCount]
+	kDistanceVals[kCount] chnget S_DistanceVals[kCount]
+
+	aLeftSigs[kCount], aRightSigs[kCount]  hrtfmove2	aSig, kAzimuthVals[kCount], kElevationVals[kCount], "hrtf-48000-left,dat", "hrtf-48000-right.dat"
+
+	aLeftSigs[kCount] = aLeftSigs[kCount] * 1 / (kDistanceVals[kCount])
+	aRightSigs[kCount] = aRightSigs[kCount] * 1 / (kDistanceVals[kCount])
+	
+	aL = aL + aLeftSigs[kCount]
+	aR = aR + aRightSigs[kCount]
+
+	loop_lt kCount, 1, 5, loop
+
+aL = aL / 5
+aR = aR / 5
 
 outs	aL,	aR
 endin
@@ -192,8 +240,8 @@ endin
 ;p1	p2	p3	p4	p5	p6	p7	p8	p9	p10	p11	p12	p13	p14	p15	p16	p17	p18	p19	p20	p21	p22	p23	p24
 ;With a metallic excitator
 
-i1 	0 	90 	50	50	70	82	80	90	1000  	720  	850	700	820	440	882  	660	220	442	500	400	350	130	200
-i1	5	90	50	1000	3000	1000	3000	1000	12	8	12	8	12	80	180	80	180	80	8	3	8	3	8
+;i1 	0 	90 	50	50	70	82	80	90	1000  	720  	850	700	820	440	882  	660	220	442	500	400	350	130	200
+;i1	5	90	50	1000	3000	1000	3000	1000	12	8	12	8	12	80	180	80	180	80	8	3	8	3	8
 
 ;i20	0	90
 
