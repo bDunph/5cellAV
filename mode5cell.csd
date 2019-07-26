@@ -192,18 +192,38 @@ loop:
 	S_ChannelNameDist strcat S_DistanceChannel, S_VertNumber
 	S_DistanceVals[iCount] sprintf "%s", S_ChannelNameDist
 
-	prints "S_AzimuthVals[%d] = %s\n", iCount, S_AzimuthVals[iCount]
-	prints "S_ElevationVals[%d] = %s\n", iCount, S_ElevationVals[iCount]
-	prints "S_DistanceVals[%d] = %s\n", iCount, S_DistanceVals[iCount]
+;	prints "S_AzimuthVals[%d] = %s\n", iCount, S_AzimuthVals[iCount]
+;	prints "S_ElevationVals[%d] = %s\n", iCount, S_ElevationVals[iCount]
+;	prints "S_DistanceVals[%d] = %s\n", iCount, S_DistanceVals[iCount]
 
 	loop_lt iCount, 1, 5, loop
 
 
-aSig	oscil	ampdb(80),	440
+aSig	oscil	ampdb(90),	440
 
 kAzimuthVals[] init 5
 kElevationVals[] init 5
 kDistanceVals[] init 5
+
+kAzimuthVals[0] chnget S_AzimuthVals[0] 
+kElevationVals[0] chnget S_ElevationVals[0] 
+kDistanceVals[0] chnget S_DistanceVals[0] 
+
+kAzimuthVals[1] chnget S_AzimuthVals[1] 
+kElevationVals[1] chnget S_ElevationVals[1] 
+kDistanceVals[1] chnget S_DistanceVals[1] 
+
+kAzimuthVals[2] chnget S_AzimuthVals[2] 
+kElevationVals[2] chnget S_ElevationVals[2] 
+kDistanceVals[2] chnget S_DistanceVals[2] 
+
+kAzimuthVals[3] chnget S_AzimuthVals[3] 
+kElevationVals[3] chnget S_ElevationVals[3] 
+kDistanceVals[3] chnget S_DistanceVals[3] 
+
+kAzimuthVals[4] chnget S_AzimuthVals[4] 
+kElevationVals[4] chnget S_ElevationVals[4] 
+kDistanceVals[4] chnget S_DistanceVals[4] 
 
 aRightSigs[] init 5
 aLeftSigs[] init 5 
@@ -211,25 +231,41 @@ aLeftSigs[] init 5
 aL init 0
 aR init 0
 
-kCount = 0
-loop:
+;kCount = 0
+;loop:
 
-	kAzimuthVals[kCount] chnget S_AzimuthVals[kCount]
-	kElevationVals[kCount] chnget S_ElevationVals[kCount]
-	kDistanceVals[kCount] chnget S_DistanceVals[kCount]
+	aLeftSigs[0], aRightSigs[0]  hrtfmove2	aSig, kAzimuthVals[0], kElevationVals[0], "hrtf-48000-left.dat", "hrtf-48000-right.dat"
 
-	aLeftSigs[kCount], aRightSigs[kCount]  hrtfmove2	aSig, kAzimuthVals[kCount], kElevationVals[kCount], "hrtf-48000-left,dat", "hrtf-48000-right.dat"
-
-	aLeftSigs[kCount] = aLeftSigs[kCount] * 1 / (kDistanceVals[kCount])
-	aRightSigs[kCount] = aRightSigs[kCount] * 1 / (kDistanceVals[kCount])
+	aLeftSigs[0] = aLeftSigs[0] * 1 / (kDistanceVals[0] + 0.01)
+	aRightSigs[0] = aRightSigs[0] * 1 / (kDistanceVals[0] + 0.01)
 	
-	aL = aL + aLeftSigs[kCount]
-	aR = aR + aRightSigs[kCount]
+	aLeftSigs[1], aRightSigs[1]  hrtfmove2	aSig, kAzimuthVals[1], kElevationVals[1], "hrtf-48000-left.dat", "hrtf-48000-right.dat"
 
-	loop_lt kCount, 1, 5, loop
+	aLeftSigs[1] = aLeftSigs[1] * 1 / (kDistanceVals[1] + 0.01)
+	aRightSigs[1] = aRightSigs[1] * 1 / (kDistanceVals[1] + 0.01)
 
-aL = aL / 5
-aR = aR / 5
+	aLeftSigs[2], aRightSigs[2]  hrtfmove2	aSig, kAzimuthVals[2], kElevationVals[2], "hrtf-48000-left.dat", "hrtf-48000-right.dat"
+
+	aLeftSigs[2] = aLeftSigs[2] * 1 / (kDistanceVals[2] + 0.01)
+	aRightSigs[2] = aRightSigs[2] * 1 / (kDistanceVals[2] + 0.01)
+
+	aLeftSigs[3], aRightSigs[3]  hrtfmove2	aSig, kAzimuthVals[3], kElevationVals[3], "hrtf-48000-left.dat", "hrtf-48000-right.dat"
+
+	aLeftSigs[3] = aLeftSigs[3] * 1 / (kDistanceVals[3] + 0.01)
+	aRightSigs[3] = aRightSigs[3] * 1 / (kDistanceVals[3] + 0.01)
+
+	aLeftSigs[4], aRightSigs[4]  hrtfmove2	aSig, kAzimuthVals[4], kElevationVals[4], "hrtf-48000-left.dat", "hrtf-48000-right.dat"
+
+	aLeftSigs[4] = aLeftSigs[4] * 1 / (kDistanceVals[4] + 0.01)
+	aRightSigs[4] = aRightSigs[4] * 1 / (kDistanceVals[4] + 0.01)
+
+	aL = (aLeftSigs[0] + aLeftSigs[1] + aLeftSigs[2] + aLeftSigs[3] + aLeftSigs[4]) / 5
+	aR = (aRightSigs[0] + aRightSigs[1] + aRightSigs[2] + aRightSigs[3] + aRightSigs[4]) / 5
+
+;	loop_lt kCount, 1, 2, loop
+
+;aL = aL / 2
+;aR = aR / 2
 
 outs	aL,	aR
 endin
