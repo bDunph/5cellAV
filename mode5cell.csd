@@ -2,7 +2,7 @@
 <CsOptions>
 ; Select audio/midi flags here according to platform
 ; Audio out   Audio in    No messages
--odac           -iadc     -d     ;;;RT audio I/O
+-odac           -iadc          ;;;RT audio I/O
 ; For Non-realtime ouput leave only the line below:
 ; -o moogvcf.wav -W ;;; for file output any platform
 </CsOptions>
@@ -14,10 +14,10 @@ kr = 4800
 ksmps = 10
 nchnls = 2
 
-instr 1; 5 modes excitator
+instr 1; Modal Synthesis Instrument 
 
 idur 	init p3
-iamp    init ampdb(p4)
+iamp    init ampdbfs(p4)
 ifreq11 init p5
 ifreq12 init p6
 ifreq13 init p7
@@ -39,14 +39,8 @@ iQ23	init p22
 iQ24	init p23
 iQ25	init p24
 
-;get input vals
-;kQval chnget "qValue"
-;kPulseVal chnget "pulse"
-
 ; to simulate the shock between the excitator and the resonator
 ashock  mpulse  1,2
-
-;aSig	phasor	440
 
 aexc1	mode 	ashock,	ifreq11,	iQ11
 aexc1 = aexc1*iamp
@@ -85,92 +79,9 @@ ares = (ares1+ares2+ares3+ares4+ares5)/5
 
 gaOut = aexc + ares
 
-;display aexc+ares,p3
-;outs  aexc+ares,aexc+ares
-
-;endin
-
-;instr 2 ; spatialisation of sound source in 3D space
-
-;aOut = aOut + 0.000001 * 0.000001
-
-;kXpos0 chnget "xPos0"
-;kYpos0 chnget "yPos0"
-;kZpos0 chnget "zPos0"
-;kXpos1 chnget "xPos1"
-;kYpos1 chnget "yPos1"
-;kZpos1 chnget "zPos1"
-;kXpos2 chnget "xPos2"
-;kYpos2 chnget "yPos2"
-;kZpos2 chnget "zPos2"
-;kXpos3 chnget "xPos3"
-;kYpos3 chnget "yPos3"
-;kZpos3 chnget "zPos3"
-;kXpos4 chnget "xPos4"
-;kYpos4 chnget "yPos4"
-;kZpos4 chnget "zPos4"
-
-;idist = sqrt(12) ; ****need to cahnge this***
-;ift = 4
-;imode = 1
-;imdel = (4 + 1) * sqrt(12) / 340.0 ; (R + 1) * sqrt(H*H + W*W + D*D) / 340.0
-;iovr = 2
-
-;a0W, a0X, a0Y, a0Z spat3d aOut, kXpos0, kYpos0, kZpos0, idist, ift, imode, imdel, iovr
-;a0W = a0W * 1.4142
-;a0L = a0W + a0Y
-;a0R = a0W - a0Y
-;
-;a1W, a1X, a1Y, a1Z spat3d aOut, kXpos1, kYpos1, kZpos1, idist, ift, imode, imdel, iovr
-;a1W = a1W * 1.4142
-;a1L = a1W + a1Y
-;a1R = a1W - a1Y
-;
-;a2W, a2X, a2Y, a2Z spat3d aOut, kXpos2, kYpos2, kZpos2, idist, ift, imode, imdel, iovr
-;a2W = a2W * 1.4142
-;a2L = a2W + a2Y
-;a2R = a2W - a2Y
-;
-;a3W, a3X, a3Y, a3Z spat3d aOut, kXpos3, kYpos3, kZpos3, idist, ift, imode, imdel, iovr
-;a3W = a3W * 1.4142
-;a3L = a3W + a3Y
-;a3R = a3W - a3Y
-;
-;a4W, a4X, a4Y, a4Z spat3d aOut, kXpos4, kYpos4, kZpos4, idist, ift, imode, imdel, iovr
-;a4W = a4W * 1.4142
-;a4L = a4W + a4Y
-;a4R = a4W - a4Y
-;
-;aOutL = (a0L + a1L + a2L + a3L + a4L)/5
-;aOutR = (a0R + a1R + a2R + a3R + a4R)/5
-;
-;outs	aOutL, aOutR
 endin
 
-instr 20 ;test instrument for chnget
-
-kx	chnget  "x"
-ky	chnget	"y" 
-kz	chnget	"z"
-
-a1   oscil     ampdb(70), 440 
-
-idistance = 1.0 ; ****need to cahnge this***
-ift = 1
-imode = 1
-imdel = 2;(4 + 1) * sqrt(12) / 340.0 ; (R + 1) * sqrt(H*H + W*W + D*D) / 340.0
-iovr = 2
-
-aW, aX, aY, aZ spat3d a1, kx, ky, kz, 1.0, 1, 1, 2, 2 
-aW = aW * 1.4142
-aL = aW + aY
-aR = aW - aY
-
-outs       aL, aR
-
-endin
-
-instr 30 ; hrtf instrument
+instr 2 ; Hrtf Instrument
 
 S_AzimuthVals[] init 5
 S_ElevationVals[] init 5
@@ -192,14 +103,7 @@ loop:
 	S_ChannelNameDist strcat S_DistanceChannel, S_VertNumber
 	S_DistanceVals[iCount] sprintf "%s", S_ChannelNameDist
 
-;	prints "S_AzimuthVals[%d] = %s\n", iCount, S_AzimuthVals[iCount]
-;	prints "S_ElevationVals[%d] = %s\n", iCount, S_ElevationVals[iCount]
-;	prints "S_DistanceVals[%d] = %s\n", iCount, S_DistanceVals[iCount]
-
 	loop_lt iCount, 1, 5, loop
-
-
-aSig	oscil	ampdb(90),	440
 
 kAzimuthVals[] init 5
 kElevationVals[] init 5
@@ -228,44 +132,28 @@ kDistanceVals[4] chnget S_DistanceVals[4]
 aRightSigs[] init 5
 aLeftSigs[] init 5 
 
-aL init 0
-aR init 0
-
-;kCount = 0
-;loop:
-
-	aLeftSigs[0], aRightSigs[0]  hrtfmove2	aSig, kAzimuthVals[0], kElevationVals[0], "hrtf-48000-left.dat", "hrtf-48000-right.dat"
-
-	aLeftSigs[0] = aLeftSigs[0] * 1 / (kDistanceVals[0] + 0.01)
-	aRightSigs[0] = aRightSigs[0] * 1 / (kDistanceVals[0] + 0.01)
+aLeftSigs[0], aRightSigs[0]  hrtfmove2	gaOut, kAzimuthVals[0], kElevationVals[0], "hrtf-48000-left.dat", "hrtf-48000-right.dat", 4, 9.0, 48000
+aLeftSigs[0] = aLeftSigs[0] * 1 / (kDistanceVals[0] + 0.01)
+aRightSigs[0] = aRightSigs[0] * 1 / (kDistanceVals[0] + 0.01)
 	
-	aLeftSigs[1], aRightSigs[1]  hrtfmove2	aSig, kAzimuthVals[1], kElevationVals[1], "hrtf-48000-left.dat", "hrtf-48000-right.dat"
+aLeftSigs[1], aRightSigs[1]  hrtfmove2	gaOut, kAzimuthVals[1], kElevationVals[1], "hrtf-48000-left.dat", "hrtf-48000-right.dat", 4, 9.0, 48000
+aLeftSigs[1] = aLeftSigs[1] * 1 / (kDistanceVals[1] + 0.01)
+aRightSigs[1] = aRightSigs[1] * 1 / (kDistanceVals[1] + 0.01)
 
-	aLeftSigs[1] = aLeftSigs[1] * 1 / (kDistanceVals[1] + 0.01)
-	aRightSigs[1] = aRightSigs[1] * 1 / (kDistanceVals[1] + 0.01)
+aLeftSigs[2], aRightSigs[2]  hrtfmove2	gaOut, kAzimuthVals[2], kElevationVals[2], "hrtf-48000-left.dat", "hrtf-48000-right.dat", 4, 9.0, 48000
+aLeftSigs[2] = aLeftSigs[2] * 1 / (kDistanceVals[2] + 0.01)
+aRightSigs[2] = aRightSigs[2] * 1 / (kDistanceVals[2] + 0.01)
 
-	aLeftSigs[2], aRightSigs[2]  hrtfmove2	aSig, kAzimuthVals[2], kElevationVals[2], "hrtf-48000-left.dat", "hrtf-48000-right.dat"
+aLeftSigs[3], aRightSigs[3]  hrtfmove2	gaOut, kAzimuthVals[3], kElevationVals[3], "hrtf-48000-left.dat", "hrtf-48000-right.dat", 4, 9.0, 48000
+aLeftSigs[3] = aLeftSigs[3] * 1 / (kDistanceVals[3] + 0.01)
+aRightSigs[3] = aRightSigs[3] * 1 / (kDistanceVals[3] + 0.01)
 
-	aLeftSigs[2] = aLeftSigs[2] * 1 / (kDistanceVals[2] + 0.01)
-	aRightSigs[2] = aRightSigs[2] * 1 / (kDistanceVals[2] + 0.01)
+aLeftSigs[4], aRightSigs[4]  hrtfmove2	gaOut, kAzimuthVals[4], kElevationVals[4], "hrtf-48000-left.dat", "hrtf-48000-right.dat", 4, 9.0, 48000
+aLeftSigs[4] = aLeftSigs[4] * 1 / (kDistanceVals[4] + 0.01)
+aRightSigs[4] = aRightSigs[4] * 1 / (kDistanceVals[4] + 0.01)
 
-	aLeftSigs[3], aRightSigs[3]  hrtfmove2	aSig, kAzimuthVals[3], kElevationVals[3], "hrtf-48000-left.dat", "hrtf-48000-right.dat"
-
-	aLeftSigs[3] = aLeftSigs[3] * 1 / (kDistanceVals[3] + 0.01)
-	aRightSigs[3] = aRightSigs[3] * 1 / (kDistanceVals[3] + 0.01)
-
-	aLeftSigs[4], aRightSigs[4]  hrtfmove2	aSig, kAzimuthVals[4], kElevationVals[4], "hrtf-48000-left.dat", "hrtf-48000-right.dat"
-
-	aLeftSigs[4] = aLeftSigs[4] * 1 / (kDistanceVals[4] + 0.01)
-	aRightSigs[4] = aRightSigs[4] * 1 / (kDistanceVals[4] + 0.01)
-
-	aL = (aLeftSigs[0] + aLeftSigs[1] + aLeftSigs[2] + aLeftSigs[3] + aLeftSigs[4]) / 5
-	aR = (aRightSigs[0] + aRightSigs[1] + aRightSigs[2] + aRightSigs[3] + aRightSigs[4]) / 5
-
-;	loop_lt kCount, 1, 2, loop
-
-;aL = aL / 2
-;aR = aR / 2
+aL = (aLeftSigs[0] + aLeftSigs[1] + aLeftSigs[2] + aLeftSigs[3] + aLeftSigs[4]) / 5
+aR = (aRightSigs[0] + aRightSigs[1] + aRightSigs[2] + aRightSigs[3] + aRightSigs[4]) / 5
 
 outs	aL,	aR
 endin
@@ -274,13 +162,10 @@ endin
 </CsInstruments>
 <CsScore>
 ;p1	p2	p3	p4	p5	p6	p7	p8	p9	p10	p11	p12	p13	p14	p15	p16	p17	p18	p19	p20	p21	p22	p23	p24
-;With a metallic excitator
 
-;i1 	0 	90 	50	50	70	82	80	90	1000  	720  	850	700	820	440	882  	660	220	442	500	400	350	130	200
-;i1	5	90	50	1000	3000	1000	3000	1000	12	8	12	8	12	80	180	80	180	80	8	3	8	3	8
+i1 	0 	90 	-3	50	70	82	80	90	1000  	720  	850	700	820	440	882  	660	220	442	500	400	350	130	200
 
-;i20	0	90
+i2	0	90
 
-i30	0	90
 </CsScore>
 </CsoundSynthesizer>

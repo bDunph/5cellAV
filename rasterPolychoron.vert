@@ -13,10 +13,14 @@ out vec3 fragPos_worldSpace;
 
 void main() {
 
+	//rotate 4D point
+	vec4 rotatedPos4D = rotZW * position4D;
+	
+	//stereographic projection
 	float dist = 2.0;
-	float xPos3D = position4D.x * dist / (dist - position4D.w);
-	float yPos3D = position4D.y * dist / (dist - position4D.w);
-	float zPos3D = position4D.z * dist / (dist - position4D.w);
+	float xPos3D = rotatedPos4D.x * dist / (dist - rotatedPos4D.w);
+	float yPos3D = rotatedPos4D.y * dist / (dist - rotatedPos4D.w);
+	float zPos3D = rotatedPos4D.z * dist / (dist - rotatedPos4D.w);
 
 	vec4 position3D = vec4(xPos3D, yPos3D, zPos3D, 1.0);
 

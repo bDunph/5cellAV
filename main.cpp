@@ -644,11 +644,11 @@ int main(int argc, char **argv){
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 30 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	
 	//GLuint lineIndex;
 	//glGenBuffers(1, &lineIndex);
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lineIndex);
 	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, 20 * sizeof(unsigned int), lineIndices, GL_STATIC_DRAW);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	//load shaders
 	char* vertex_shader;
@@ -704,8 +704,11 @@ int main(int argc, char **argv){
 
 	glBindVertexArray(0);
 
-	glm::vec3 scale5Cell = glm::vec3(50.f, 50.f, 50.f);
-	glm::mat4 fiveCellModelMatrix = glm::scale(modelMatrix, scale5Cell);
+	glm::mat4 fiveCellModelMatrix;
+
+	glm::vec3 scale5Cell = glm::vec3(50.0f, 50.0f, 50.0f);
+	glm::mat4 scale5CellMatrix = glm::scale(modelMatrix, scale5Cell);
+	
 //***********************************************************************************************************
 
 	//workaround for macOS Mojave bug
@@ -771,13 +774,22 @@ int main(int argc, char **argv){
 		}
 
 		//rotation around W axis
-		//glm::mat4 rotationZW = glm::mat4(
-		//	1.0f, 0.0f, 0.0f, 0.0f,
-		//	0.0f, 1.0f, 0.0f, 0.0f,
-		//	0.0f, 0.0f, cos(glfwGetTime()), -sin(glfwGetTime()),
-		//	0.0f, 0.0f, sin(glfwGetTime()), cos(glfwGetTime())
-		//);
-
+		glm::mat4 rotationZW = glm::mat4(
+			1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, cos(glfwGetTime() * 0.2f), -sin(glfwGetTime() * 0.2f),
+			0.0f, 0.0f, sin(glfwGetTime() * 0.2f), cos(glfwGetTime() * 0.2f)
+		);
+	
+		//glm::mat4 rotationXYZW = glm::mat4(	cos(glfwGetTime() * 0.2f), -sin(glfwGetTime() * 0.2f),	0.0f, 0.0f,
+		//					sin(glfwGetTime() * 0.2f), cos(glfwGetTime() * 0.2f), 	0.0f, 0.0f,
+		//					0.0f, 0.0f, cos(glfwGetTime() * 0.2f), -sin(glfwGetTime() * 0.2f), 
+		//					0.0f, 0.0f, sin(glfwGetTime() * 0.2f), cos(glfwGetTime() * 0.2f) 
+		//				);
+ 
+		float rotAngle = glfwGetTime() * 0.2f;
+		glm::mat4 fiveCellRotationMatrix3D = glm::rotate(modelMatrix, rotAngle, glm::vec3(0, 1, 0)) ;
+		fiveCellModelMatrix = scale5CellMatrix;
 				
 //**********************************************************************************************************
 // Draw Stuff Here
@@ -791,7 +803,7 @@ int main(int argc, char **argv){
 		glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
 		glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
 		glUniformMatrix4fv(fiveCellModelMatLoc, 1, GL_FALSE, &fiveCellModelMatrix[0][0]);
-      		//glUniformMatrix4fv(rotationZWLoc, 1, GL_FALSE, &rotationZW[0][0]);
+      		glUniformMatrix4fv(rotationZWLoc, 1, GL_FALSE, &rotationZW[0][0]);
 		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
 		glUniform3f(light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
 		glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
