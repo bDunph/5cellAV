@@ -211,7 +211,7 @@ int main(int argc, char **argv){
 	modelMatrix = glm::mat4(1.0f);
 
 	glm::vec3 lightPos = glm::vec3(-2.0f, -1.0f, -1.5f); 
-	glm::vec3 lightPos2 = glm::vec3(0.0f, 3.0f, 1.5f);
+	glm::vec3 lightPos2 = glm::vec3(1.0f, 40.0f, 1.5f);
 //****************************************************************************************************
 
 //***************************************************************************************************
@@ -475,14 +475,14 @@ int main(int argc, char **argv){
 	};
 
 	/* indices specifying 10 faces */
-	unsigned int indices [30] = {
+	unsigned int indices [21] = {
 		4, 2, 3,
 		3, 0, 2,
 		2, 0, 4,
 		4, 0, 3,
-		3, 1, 0,
+		/*3, 1, 0,
 		1, 4, 0,
-		0, 1, 2,
+		0, 1, 2,*/
 		2, 3, 1,
 		1, 3, 4,
 		4, 2, 1	
@@ -511,7 +511,7 @@ int main(int argc, char **argv){
 	};
 
 	//array of faces
-	glm::vec3 faceArray [10] = {
+	glm::vec3 faceArray [7] = {
 		glm::vec3(indices[0], indices[1], indices[2]),
 		glm::vec3(indices[3], indices[4], indices[5]),
 		glm::vec3(indices[6], indices[7], indices[8]),
@@ -519,12 +519,12 @@ int main(int argc, char **argv){
 		glm::vec3(indices[12], indices[13], indices[14]),
 		glm::vec3(indices[15], indices[16], indices[17]),
 		glm::vec3(indices[18], indices[19], indices[20]),
-		glm::vec3(indices[21], indices[22], indices[23]),
+		/*glm::vec3(indices[21], indices[22], indices[23]),
 		glm::vec3(indices[24], indices[25], indices[26]),
-		glm::vec3(indices[27], indices[28], indices[29]),
+		glm::vec3(indices[27], indices[28], indices[29]),*/
 	};
 
-	glm::vec4 faceNormalArray [10];
+	glm::vec4 faceNormalArray [7];
 	
 	//calculate vertex normals in 4D to send to shaders for lighting
 	for(int i = 0; i < _countof(faceArray); i++){
@@ -641,7 +641,7 @@ int main(int argc, char **argv){
 	GLuint index;
 	glGenBuffers(1, &index);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 30 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 21 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	//GLuint lineIndex;
@@ -809,7 +809,7 @@ int main(int argc, char **argv){
 		glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
 
       		// draw 5-cell using index buffer
-		glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+		glDrawElements(GL_TRIANGLES, 21 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
       		//glDrawElements(GL_LINES, 20 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
