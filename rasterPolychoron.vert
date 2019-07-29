@@ -7,6 +7,7 @@ uniform mat4 projMat;
 uniform mat4 viewMat;
 uniform mat4 fiveCellModelMat;
 uniform mat4 rotZW;
+uniform mat4 rotXW;
  
 out vec3 vertNormal_worldSpace;
 out vec3 fragPos_worldSpace;
@@ -14,8 +15,8 @@ out vec3 fragPos_worldSpace;
 void main() {
 
 	//rotate 4D point
-	vec4 rotatedPos4D = rotZW * position4D;
-	vec4 rotatedNorm4D = rotZW * normal4D;
+	vec4 rotatedPos4D = rotZW * rotXW * position4D;
+	vec4 rotatedNorm4D = rotZW * rotXW * normal4D;
 	
 	//stereographic projection
 	float dist = 2.0;

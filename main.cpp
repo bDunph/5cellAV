@@ -184,12 +184,8 @@ int main(int argc, char **argv){
 	printf("Renderer: %s\n", renderer);
 	printf("OpenGL version supported %s\n", version);
 
-	//tell GL only to draw onto a pixel if a shape is closer to the viewer
-	glEnable(GL_DEPTH_TEST); //enable depth testing
-	glDepthFunc(GL_LESS); //depth testing interprets a smaller value as "closer"
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_CULL_FACE);
 
 //******************************************************************************************
 // Matrices & Light Positions
@@ -475,14 +471,14 @@ int main(int argc, char **argv){
 	};
 
 	/* indices specifying 10 faces */
-	unsigned int indices [21] = {
+	unsigned int indices [30] = {
 		4, 2, 3,
 		3, 0, 2,
 		2, 0, 4,
 		4, 0, 3,
-		/*3, 1, 0,
+		3, 1, 0,
 		1, 4, 0,
-		0, 1, 2,*/
+		0, 1, 2,
 		2, 3, 1,
 		1, 3, 4,
 		4, 2, 1	
@@ -511,7 +507,7 @@ int main(int argc, char **argv){
 	};
 
 	//array of faces
-	glm::vec3 faceArray [7] = {
+	glm::vec3 faceArray [10] = {
 		glm::vec3(indices[0], indices[1], indices[2]),
 		glm::vec3(indices[3], indices[4], indices[5]),
 		glm::vec3(indices[6], indices[7], indices[8]),
@@ -519,12 +515,12 @@ int main(int argc, char **argv){
 		glm::vec3(indices[12], indices[13], indices[14]),
 		glm::vec3(indices[15], indices[16], indices[17]),
 		glm::vec3(indices[18], indices[19], indices[20]),
-		/*glm::vec3(indices[21], indices[22], indices[23]),
+		glm::vec3(indices[21], indices[22], indices[23]),
 		glm::vec3(indices[24], indices[25], indices[26]),
-		glm::vec3(indices[27], indices[28], indices[29]),*/
+		glm::vec3(indices[27], indices[28], indices[29]),
 	};
 
-	glm::vec4 faceNormalArray [7];
+	glm::vec4 faceNormalArray [10];
 	
 	//calculate vertex normals in 4D to send to shaders for lighting
 	for(int i = 0; i < _countof(faceArray); i++){
@@ -641,7 +637,7 @@ int main(int argc, char **argv){
 	GLuint index;
 	glGenBuffers(1, &index);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 21 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 30 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	//GLuint lineIndex;
@@ -687,11 +683,14 @@ int main(int argc, char **argv){
 	GLint viewMatLoc = glGetUniformLocation(shader_program, "viewMat");
 	GLint fiveCellModelMatLoc = glGetUniformLocation(shader_program, "fiveCellModelMat");
 	GLint rotationZWLoc = glGetUniformLocation(shader_program, "rotZW");
+	GLint rotationXWLoc = glGetUniformLocation(shader_program, "rotXW");
 
 	GLint lightPosLoc = glGetUniformLocation(shader_program, "lightPos");
 	GLint light2PosLoc = glGetUniformLocation(shader_program, "light2Pos");
 
 	GLint cameraPosLoc = glGetUniformLocation(shader_program, "camPos");
+
+	GLint factorLoc = glGetUniformLocation(shader_program, "transparencyFactor");
 
 	//print_all(shader_program);
 
@@ -706,7 +705,7 @@ int main(int argc, char **argv){
 
 	glm::mat4 fiveCellModelMatrix;
 
-	glm::vec3 scale5Cell = glm::vec3(50.0f, 50.0f, 50.0f);
+	glm::vec3 scale5Cell = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::mat4 scale5CellMatrix = glm::scale(modelMatrix, scale5Cell);
 	
 //***********************************************************************************************************
@@ -781,11 +780,12 @@ int main(int argc, char **argv){
 			0.0f, 0.0f, sin(glfwGetTime() * 0.2f), cos(glfwGetTime() * 0.2f)
 		);
 	
-		//glm::mat4 rotationXYZW = glm::mat4(	cos(glfwGetTime() * 0.2f), -sin(glfwGetTime() * 0.2f),	0.0f, 0.0f,
-		//					sin(glfwGetTime() * 0.2f), cos(glfwGetTime() * 0.2f), 	0.0f, 0.0f,
-		//					0.0f, 0.0f, cos(glfwGetTime() * 0.2f), -sin(glfwGetTime() * 0.2f), 
-		//					0.0f, 0.0f, sin(glfwGetTime() * 0.2f), cos(glfwGetTime() * 0.2f) 
-		//				);
+		glm::mat4 rotationXW = glm::mat4(	
+			cos(glfwGetTime() * 0.2f), 0.0f, 0.0f, sin(glfwGetTime() * 0.2f),
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f, 
+			-sin(glfwGetTime() * 0.2f), 0.0f, 0.0f, cos(glfwGetTime() * 0.2f) 
+		);
  
 		float rotAngle = glfwGetTime() * 0.2f;
 		glm::mat4 fiveCellRotationMatrix3D = glm::rotate(modelMatrix, rotAngle, glm::vec3(0, 1, 0)) ;
@@ -796,6 +796,9 @@ int main(int argc, char **argv){
 //*********************************************************************************************************
 
 		// draw 4D polytope	
+		
+		double f = 0.75;
+
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
 		glUseProgram(shader_program);
@@ -804,47 +807,63 @@ int main(int argc, char **argv){
 		glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
 		glUniformMatrix4fv(fiveCellModelMatLoc, 1, GL_FALSE, &fiveCellModelMatrix[0][0]);
       		glUniformMatrix4fv(rotationZWLoc, 1, GL_FALSE, &rotationZW[0][0]);
+		glUniformMatrix4fv(rotationXWLoc, 1, GL_FALSE, &rotationXW[0][0]);
 		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
 		glUniform3f(light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
 		glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+		glUniform1f(facorLoc, f);
+
+		glDisable(GL_CULL_FACE);
+		glDepthFunc(GL_LEQUAL);
 
       		// draw 5-cell using index buffer
-		glDrawElements(GL_TRIANGLES, 21 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+		glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
       		//glDrawElements(GL_LINES, 20 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		
+		
+		glDepthFunc(GL_GREATER);
+		f = 0.0f;	
 	
+		glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+
+		glDepthFunc(GL_LEQUAL);
+	//***** HERE *********************//	
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 		// draw ground plane second 
-		glBindVertexArray(groundVAO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, groundIndexBuffer); 
-		glUseProgram(groundPlaneShaderProg);
 
-		glUniformMatrix4fv(ground_projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
-		glUniformMatrix4fv(ground_viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
-		glUniformMatrix4fv(ground_modelMatLoc, 1, GL_FALSE, &groundModelMatrix[0][0]);
-		glUniform3f(ground_lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-		glUniform3f(ground_light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
-		glUniform3f(ground_cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+		//glDepthFunc(GL_LESS);
 
-		glDrawElements(GL_TRIANGLES, 6 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		//glBindVertexArray(groundVAO);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, groundIndexBuffer); 
+		//glUseProgram(groundPlaneShaderProg);
 
-		//draw sound test object
-		glBindVertexArray(soundVAO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, soundObjIndexBuffer);
-		glUseProgram(soundObjShaderProg);
+		//glUniformMatrix4fv(ground_projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
+		//glUniformMatrix4fv(ground_viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+		//glUniformMatrix4fv(ground_modelMatLoc, 1, GL_FALSE, &groundModelMatrix[0][0]);
+		//glUniform3f(ground_lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+		//glUniform3f(ground_light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
+		//glUniform3f(ground_cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
 
-		glUniformMatrix4fv(soundObj_projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
-		glUniformMatrix4fv(soundObj_viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
-		glUniformMatrix4fv(soundObj_modelMatLoc, 1, GL_FALSE, &soundModelMatrix[0][0]);
-		glUniform3f(soundObj_lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-		glUniform3f(soundObj_light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
-		glUniform3f(soundObj_cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+		//glDrawElements(GL_TRIANGLES, 6 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		//glBindVertexArray(0);
 
-		glDrawElements(GL_TRIANGLES, 36 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		////draw sound test object
+		//glBindVertexArray(soundVAO);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, soundObjIndexBuffer);
+		//glUseProgram(soundObjShaderProg);
+
+		//glUniformMatrix4fv(soundObj_projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
+		//glUniformMatrix4fv(soundObj_viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+		//glUniformMatrix4fv(soundObj_modelMatLoc, 1, GL_FALSE, &soundModelMatrix[0][0]);
+		//glUniform3f(soundObj_lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+		//glUniform3f(soundObj_light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
+		//glUniform3f(soundObj_cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+
+		//glDrawElements(GL_TRIANGLES, 36 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		//glBindVertexArray(0);
 
 		//update other events like input handling
 		glfwPollEvents();
