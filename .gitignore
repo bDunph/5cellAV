@@ -1,3 +1,5 @@
 renderOut
 .DS_Store
 *.swp
+*.tga
+/textures/*

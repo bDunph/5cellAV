@@ -15,8 +15,8 @@ out vec3 fragPos_worldSpace;
 void main() {
 
 	//rotate 4D point
-	vec4 rotatedPos4D = rotZW * rotXW * position4D;
-	vec4 rotatedNorm4D = rotZW * rotXW * normal4D;
+	vec4 rotatedPos4D = position4D;
+	vec4 rotatedNorm4D = normal4D;
 	
 	//stereographic projection
 	float dist = 2.0;
@@ -33,8 +33,9 @@ void main() {
 	float yNorm3D = rotatedNorm4D.y * dist / (dist - rotatedNorm4D.w);
 	float zNorm3D = rotatedNorm4D.z * dist / (dist - rotatedNorm4D.w);
 	
-	vec3 normal3D = vec3(xNorm3D, yNorm3D, zNorm3D);
-	vertNormal_worldSpace = mat3(transpose(inverse(fiveCellModelMat))) * normal3D;
+	vec4 normal3D = vec4(xNorm3D, yNorm3D, zNorm3D, 0.0);
+	vec4 normTrans = transpose(inverse(fiveCellModelMat)) * normal3D;
+	vertNormal_worldSpace = normTrans.xyz;
 
 	gl_Position = projMat * viewMat * fiveCellModelMat *  position3D;	
 }

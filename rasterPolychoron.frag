@@ -3,7 +3,7 @@
 uniform vec3 lightPos;
 uniform vec3 light2Pos;
 uniform vec3 camPos;
-uniform vec3 transparencyFactor;
+uniform float alpha;
 
 in vec3 vertNormal_worldSpace;
 in vec3 fragPos_worldSpace;
@@ -12,7 +12,7 @@ out vec4 colour_out;
 
 void main() {
 	
-	float specularStrength = 0.2;
+	float specularStrength = 0.4;
 	vec3 lightColour = vec3(1.0, 1.0, 1.0);
 	
 	//*** Ambient ***//
@@ -43,5 +43,5 @@ void main() {
 	vec3 result = (ambient + diffuse + specular) * objectColour;
 	vec3 result2 = (ambient + diffuse2 + specular2) * objectColour;
 
-	colour_out = vec4(result + result2, 0.3 * transparencyFactor);
+	colour_out = vec4(result + result2, alpha);
 }
