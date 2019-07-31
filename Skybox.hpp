@@ -11,7 +11,7 @@ class Skybox {
 
 public:
 
-	bool setup(std::string texName);
+	bool setup();
 	void draw(glm::mat4 projMat, glm::mat4 viewMat);
 
 private:

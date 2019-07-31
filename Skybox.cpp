@@ -7,66 +7,66 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-bool Skybox::setup(std::string texName){
+bool Skybox::setup(){
 
 	//Skybox vertices
 	float skyboxVerts [24] = {
 		//top left front	
-		-1.0f, 1.0f, -1.0f,
-		//bottom left front
-		-1.0f, -1.0f, -1.0f,
-		//bottom right front
-		1.0f, -1.0f, -1.0f,
-		//top right front
-		1.0f, 1.0f, -1.0f,
-		//top left back
 		-1.0f, 1.0f, 1.0f,
-		//bottom left back
+		//bottom left front
 		-1.0f, -1.0f, 1.0f,
-		//bottom right back
+		//bottom right front
 		1.0f, -1.0f, 1.0f,
+		//top right front
+		1.0f, 1.0f, 1.0f,
+		//top left back
+		-1.0f, 1.0f, -1.0f,
+		//bottom left back
+		-1.0f, -1.0f, -1.0f,
+		//bottom right back
+		1.0f, -1.0f, -1.0f,
 		//top right back
-		1.0f, 1.0f, 1.0f
+		1.0f, 1.0f, -1.0f
 	};
 
 	unsigned int skyboxIndices [36] = {
 		//front face
-		0, 1, 2,
-		0, 2, 3,
+		0, 3, 2,
+		0, 2, 1,
 		//right face
-		3, 2, 6,
-		3, 6, 7,
+		3, 7, 6,
+		3, 6, 2,
 		//back face
-		7, 6, 5,
-		7, 5, 4,
+		7, 4, 5,
+		7, 5, 6,
 		//left face
-		4, 5, 1,
-		4, 1, 0,
+		4, 0, 1,
+		4, 1, 5,
 		//bottom face
-		5, 6, 2,
-		5, 2, 1,
+		1, 2, 6,
+		1, 6, 5,
 		//top face
-		4, 0, 3,
-		4, 3, 7
+		4, 7, 3,
+		4, 3, 0
 	};
 
 	float skyboxNormals [24] = {
 		//top front left
-		-1.0f, 1.0f, -1.0f,
-		//bottom front left
-		-1.0f, -1.0f, -1.0f,
-		//bottom front right
-		1.0f, -1.0f, -1.0f,
-		//top front right
-		1.0f, 1.0f, -1.0f,
-		//top left back
 		-1.0f, 1.0f, 1.0f,
-		//bottom left back
+		//bottom front left
 		-1.0f, -1.0f, 1.0f,
-		//bottom right back
+		//bottom front right
 		1.0f, -1.0f, 1.0f,
+		//top front right
+		1.0f, 1.0f, 1.0f,
+		//top left back
+		-1.0f, 1.0f, -1.0f,
+		//bottom left back
+		-1.0f, -1.0f, -1.0f,
+		//bottom right back
+		1.0f, -1.0f, -1.0f,
 		//top right back
-		1.0f, 1.0f, 1.0f
+		1.0f, 1.0f, -1.0f
 	};	
 
 	//Set up skybox buffers
@@ -97,12 +97,12 @@ bool Skybox::setup(std::string texName){
 
 	//load textures
 	std::vector<std::string> textureNames;
-	textureNames.push_back("arrakisday_rt.tga");
-	textureNames.push_back("arrakisday_lf.tga");
-	textureNames.push_back("arrakisday_up.tga");
-	textureNames.push_back("arrakisday_dn.tga");
-	textureNames.push_back("arrakisday_ft.tga");
-	textureNames.push_back("arrakisday_bk.tga");
+	textureNames.push_back("violentdays_ft.tga");
+	textureNames.push_back("violentdays_bk.tga");
+	textureNames.push_back("violentdays_up.tga");
+	textureNames.push_back("violentdays_dn.tga");
+	textureNames.push_back("violentdays_rt.tga");
+	textureNames.push_back("violentdays_lf.tga");
 
 	//std::string name1 = texName.append("_rt.tga");
 	//textureNames.push_back(name1);
@@ -137,8 +137,6 @@ bool Skybox::setup(std::string texName){
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  	
-	
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 	glGenBuffers(1, &skyboxIndexBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxIndexBuffer);
@@ -204,15 +202,14 @@ void Skybox::draw(glm::mat4 projMat, glm::mat4 viewMat){
 
 	glm::mat4 viewNoTranslation = glm::mat4(glm::mat3(viewMat));
 
+	glDepthFunc(GL_LEQUAL);
 	glDepthMask(GL_FALSE);
 	glUseProgram(skyboxShaderProg);
 	glUniformMatrix4fv(skybox_projMatLoc, 1, GL_FALSE, &projMat[0][0]);
 	glUniformMatrix4fv(skybox_viewMatLoc, 1, GL_FALSE, &viewNoTranslation[0][0]);
 	glBindVertexArray(skyboxVAO);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxIndexBuffer); 
 	glDrawElements(GL_TRIANGLES, 36 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glDepthMask(GL_TRUE);

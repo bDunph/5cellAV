@@ -10,5 +10,8 @@ out vec3 TexCoords;
 void main(){
 
 	TexCoords = position;
-	gl_Position = projMat * viewMat * vec4(position, 1.0);
+	vec4 projectedPos = projMat * viewMat * vec4(position, 1.0);
+	//optimisation: setting vert z value to w so depth will always be 1.0
+	//therefore making sure skybox will always be behind objects
+	gl_Position = projectedPos.xyww;
 }

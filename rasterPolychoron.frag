@@ -2,16 +2,26 @@
 
 uniform vec3 lightPos;
 uniform vec3 light2Pos;
-uniform vec3 camPos;
 uniform float alpha;
-
+uniform vec3 camPos;
+uniform samplerCube skybox;
+ 
 in vec3 vertNormal_worldSpace;
 in vec3 fragPos_worldSpace;
 
 out vec4 colour_out;
 
 void main() {
-	
+
+//************ Refraction***************************//
+	// ratio of air refractive index 1.0 and glass refractive index 1.52
+	//float ratio = 1.0 / 1.52;
+	//vec3 I = normalize(fragPos_worldSpace - camPos);
+	//vec3 R = refract(I, normalize(vertNormal_worldSpace), ratio);
+	//colour_out = vec4(texture(skybox, R).rgb, 1.0);
+//*********************************************//
+
+//*********** Blinn-Phong ************************//	
 	float specularStrength = 0.4;
 	vec3 lightColour = vec3(1.0, 1.0, 1.0);
 	
@@ -44,4 +54,5 @@ void main() {
 	vec3 result2 = (ambient + diffuse2 + specular2) * objectColour;
 
 	colour_out = vec4(result + result2, alpha);
+//****************************************************//
 }
