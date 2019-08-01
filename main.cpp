@@ -733,7 +733,7 @@ int main(int argc, char **argv){
 
 	glm::mat4 fiveCellModelMatrix;
 
-	glm::vec3 scale5Cell = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 scale5Cell = glm::vec3(50.0f, 50.0f, 50.0f);
 	glm::mat4 scale5CellMatrix = glm::scale(modelMatrix, scale5Cell);
 	
 //***********************************************************************************************************
@@ -830,6 +830,7 @@ int main(int argc, char **argv){
 
 		//draw skybox
 		skybox.draw(projectionMatrix, viewMatrix);
+		glDepthFunc(GL_LESS);
 		
 		//draw 4D polytope	
 		float a = 0.0f;
@@ -848,16 +849,16 @@ int main(int argc, char **argv){
 		glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
 		glUniform1f(alphaLoc, a);
 
-		// single draw call for refractive rendering
+		//single draw call for refractive rendering
 		//glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
       		//glDrawElements(GL_LINES, 20 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
 
-      		// draw 5-cell using index buffer and 5 pass transparency technique from http://www.alecjacobson.com/weblog/?p=2750
-		// 1st pass
+      		//draw 5-cell using index buffer and 5 pass transparency technique from http://www.alecjacobson.com/weblog/?p=2750
+		//1st pass
 		glDisable(GL_CULL_FACE);
 		glDepthFunc(GL_LESS);
 		float f = 0.75f;
-		float origAlpha = 0.6f;	
+		float origAlpha = 0.4f;	
 		a = 0.0f;
 		glUniform1f(alphaLoc, a);
 		glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
@@ -896,37 +897,37 @@ int main(int argc, char **argv){
 		// draw ground plane second 
 		glDepthFunc(GL_LESS);
 
-		//glBindVertexArray(groundVAO);
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, groundIndexBuffer); 
-		//glUseProgram(groundPlaneShaderProg);
+		glBindVertexArray(groundVAO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, groundIndexBuffer); 
+		glUseProgram(groundPlaneShaderProg);
 
-		//glUniformMatrix4fv(ground_projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
-		//glUniformMatrix4fv(ground_viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
-		//glUniformMatrix4fv(ground_modelMatLoc, 1, GL_FALSE, &groundModelMatrix[0][0]);
-		//glUniform3f(ground_lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-		//glUniform3f(ground_light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
-		//glUniform3f(ground_cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+		glUniformMatrix4fv(ground_projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
+		glUniformMatrix4fv(ground_viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+		glUniformMatrix4fv(ground_modelMatLoc, 1, GL_FALSE, &groundModelMatrix[0][0]);
+		glUniform3f(ground_lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+		glUniform3f(ground_light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
+		glUniform3f(ground_cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
 
-		//glDrawElements(GL_TRIANGLES, 6 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		//glBindVertexArray(0);
+		glDrawElements(GL_TRIANGLES, 6 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 
 		//draw sound test object
-		//glEnable(GL_CULL_FACE);
-		//glBindVertexArray(soundVAO);
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, soundObjIndexBuffer);
-		//glUseProgram(soundObjShaderProg);
+		glEnable(GL_CULL_FACE);
+		glBindVertexArray(soundVAO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, soundObjIndexBuffer);
+		glUseProgram(soundObjShaderProg);
 
-		//glUniformMatrix4fv(soundObj_projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
-		//glUniformMatrix4fv(soundObj_viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
-		//glUniformMatrix4fv(soundObj_modelMatLoc, 1, GL_FALSE, &soundModelMatrix[0][0]);
-		//glUniform3f(soundObj_lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-		//glUniform3f(soundObj_light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
-		//glUniform3f(soundObj_cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+		glUniformMatrix4fv(soundObj_projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
+		glUniformMatrix4fv(soundObj_viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+		glUniformMatrix4fv(soundObj_modelMatLoc, 1, GL_FALSE, &soundModelMatrix[0][0]);
+		glUniform3f(soundObj_lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+		glUniform3f(soundObj_light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
+		glUniform3f(soundObj_cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
 
-		//glDrawElements(GL_TRIANGLES, 36 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		//glBindVertexArray(0);
+		glDrawElements(GL_TRIANGLES, 36 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 
 		//update other events like input handling
 		glfwPollEvents();

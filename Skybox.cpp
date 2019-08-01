@@ -97,12 +97,12 @@ bool Skybox::setup(){
 
 	//load textures
 	std::vector<std::string> textureNames;
-	textureNames.push_back("violentdays_ft.tga");
-	textureNames.push_back("violentdays_bk.tga");
-	textureNames.push_back("violentdays_up.tga");
-	textureNames.push_back("violentdays_dn.tga");
-	textureNames.push_back("violentdays_rt.tga");
-	textureNames.push_back("violentdays_lf.tga");
+	textureNames.push_back("misty_ft.tga");
+	textureNames.push_back("misty_bk.tga");
+	textureNames.push_back("misty_up.tga");
+	textureNames.push_back("misty_dn.tga");
+	textureNames.push_back("misty_rt.tga");
+	textureNames.push_back("misty_lf.tga");
 
 	//std::string name1 = texName.append("_rt.tga");
 	//textureNames.push_back(name1);

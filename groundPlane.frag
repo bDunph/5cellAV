@@ -15,7 +15,7 @@ void main(){
 	vec3 lightColour = vec3(1.0, 1.0, 1.0);
 	
 	//*** Ambient ***//
-	vec3 objectColour = vec3(0.15, 0.8125, 0.05);
+	vec3 objectColour = vec3(0.75, 0.8125, 0.95);
 	float ambientStrength = 0.3;
 
 	vec3 ambient = ambientStrength * lightColour;
@@ -41,6 +41,6 @@ void main(){
 	vec3 result = (ambient + diffuse + specular) * objectColour;
 	vec3 result2 = (ambient + diffuse2 + specular2) * objectColour;
 
-	colour_out = vec4(result + result2, 0.2);
+	colour_out = vec4(result + result2, 0.4);
 
 } 
