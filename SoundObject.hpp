@@ -13,8 +13,8 @@ class SoundObject {
 
 public:
 	bool setup();
-	void update();
-	void draw():
+	void update(glm::vec3 &translationVal);
+	void draw(glm::mat4 &projMat, glm::mat4 &viewMat, glm::vec3 &lightPosition, glm::vec3 &light2Position, glm::vec3 cameraPosition);
 private:
 
 	GLuint soundVAO;
@@ -30,7 +30,6 @@ private:
 
 	glm::mat4 identityModelMat;
 	glm::mat4 scaleMat;
-	glm::mat4 translateMat;
 	glm::mat4 soundModelMatrix;
 	
 };

@@ -2,6 +2,7 @@
 #include "shader_manager.h"
 
 #include <GLFW/glfw3.h>
+#include <iostream>
 
 bool SoundObject::setup(){
 
@@ -95,11 +96,11 @@ bool SoundObject::setup(){
 	//load shaders
 	char* soundObjVertShader;
 	bool isSoundObjVertLoaded = load_shader("soundObj.vert", soundObjVertShader);
-	if(!isSoundObjVertLoaded) return 1;
+	if(!isSoundObjVertLoaded) return false;
 
 	char* soundObjFragShader;
 	bool isSoundObjFragLoaded = load_shader("soundObj.frag", soundObjFragShader);
-	if(!isSoundObjFragLoaded) return 1;
+	if(!isSoundObjFragLoaded) return false;
 
 	GLuint svs = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(svs, 1, &soundObjVertShader, NULL);
@@ -107,7 +108,7 @@ bool SoundObject::setup(){
 	delete[] soundObjVertShader;
 	//check for compile errors
 	bool isSoundObjVertCompiled = shader_compile_check(svs);
-	if(!isSoundObjVertCompiled) return 1;
+	if(!isSoundObjVertCompiled) return false;
 
 	GLuint sfs = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(sfs, 1, &soundObjFragShader, NULL);
@@ -115,14 +116,14 @@ bool SoundObject::setup(){
 	delete[] soundObjFragShader;
 	//check for compile errors
 	bool isSoundObjFragCompiled = shader_compile_check(sfs);
-	if(!isSoundObjFragCompiled) return 1;
+	if(!isSoundObjFragCompiled) return false;
 	
 	soundObjShaderProg = glCreateProgram();
 	glAttachShader(soundObjShaderProg, sfs);
 	glAttachShader(soundObjShaderProg, svs);
 	glLinkProgram(soundObjShaderProg);
 	bool didSoundObjShadersLink = shader_link_check(soundObjShaderProg);
-	if(!didSoundObjShadersLink) return 1;
+	if(!didSoundObjShadersLink) return false;
 
 	//uniform setup
 	soundObj_projMatLoc = glGetUniformLocation(soundObjShaderProg, "projMat");
@@ -138,39 +139,40 @@ bool SoundObject::setup(){
 	bool validSoundObjProgram = is_valid(soundObjShaderProg);
 	if(!validSoundObjProgram){
 		fprintf(stderr, "ERROR: soundObjShaderProg not valid\n");
-		return 1;
+		return false;
 	}
 
 	glBindVertexArray(0);
 	
 	identityModelMat = glm::mat4(1.0);
-	glm::vec3 trans = glm::vec3(0.0f, 2.0f, 0.0f);
 	glm::vec3 scale = glm::vec3(0.1f, 0.1f, 0.1f);
 	scaleMat = glm::scale(identityModelMat, scale);
-	translateMat = glm::translate(identityModelMat, trans);
 
+	return true;
 }
 
-void SoundObject::update(){
+void SoundObject::update(glm::vec3 &translationVal){
 
 	float soundModelRotAngle = glfwGetTime() * 0.2f;
-	glm::mat4 rotateSoundModel = glm::rotate(modelMatrix, soundModelRotAngle, glm::vec3(0, 1, 0));;
+	glm::mat4 rotateSoundModel = glm::rotate(identityModelMat, soundModelRotAngle, glm::vec3(0, 1, 0));;
+	glm::vec3 finalTranslation = translationVal + glm::vec3(0.0, 2.0, 0.0);
+	glm::mat4 translateMat = glm::translate(identityModelMat, finalTranslation);
 	soundModelMatrix = translateMat * rotateSoundModel * scaleMat;
 }
 
-void SoundObject::draw(){
+void SoundObject::draw(glm::mat4 &projMat, glm::mat4 &viewMat, glm::vec3 &lightPosition, glm::vec3 &light2Position, glm::vec3 cameraPosition){
 
 	glEnable(GL_CULL_FACE);
 	glBindVertexArray(soundVAO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, soundObjIndexBuffer);
 	glUseProgram(soundObjShaderProg);
 
-	glUniformMatrix4fv(soundObj_projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
-	glUniformMatrix4fv(soundObj_viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+	glUniformMatrix4fv(soundObj_projMatLoc, 1, GL_FALSE, &projMat[0][0]);
+	glUniformMatrix4fv(soundObj_viewMatLoc, 1, GL_FALSE, &viewMat[0][0]);
 	glUniformMatrix4fv(soundObj_modelMatLoc, 1, GL_FALSE, &soundModelMatrix[0][0]);
-	glUniform3f(soundObj_lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-	glUniform3f(soundObj_light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
-	glUniform3f(soundObj_cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+	glUniform3f(soundObj_lightPosLoc, lightPosition.x, lightPosition.y, lightPosition.z);
+	glUniform3f(soundObj_light2PosLoc, light2Position.x, light2Position.y, light2Position.z);
+	glUniform3f(soundObj_cameraPosLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
 	glDrawElements(GL_TRIANGLES, 36 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
