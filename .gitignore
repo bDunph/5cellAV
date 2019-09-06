@@ -3,3 +3,4 @@ renderOut
 *.swp
 *.tga
 /textures/*
+gl.log
