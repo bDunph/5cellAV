@@ -706,66 +706,66 @@ int main(int argc, char **argv){
 		glDepthFunc(GL_LESS);
 		
 		//draw 4D polytope	
-		//float a = 0.0f;
+		float a = 0.0f;
 
-		//glBindVertexArray(vao);
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
-		//glUseProgram(shader_program);
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
+		glUseProgram(shader_program);
 
-		//glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
-		//glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
-		//glUniformMatrix4fv(fiveCellModelMatLoc, 1, GL_FALSE, &fiveCellModelMatrix[0][0]);
-      		//glUniformMatrix4fv(rotationZWLoc, 1, GL_FALSE, &rotationZW[0][0]);
-		//glUniformMatrix4fv(rotationXWLoc, 1, GL_FALSE, &rotationXW[0][0]);
-		//glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-		//glUniform3f(light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
-		//glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
-		//glUniform1f(alphaLoc, a);
+		glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
+		glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+		glUniformMatrix4fv(fiveCellModelMatLoc, 1, GL_FALSE, &fiveCellModelMatrix[0][0]);
+      		glUniformMatrix4fv(rotationZWLoc, 1, GL_FALSE, &rotationZW[0][0]);
+		glUniformMatrix4fv(rotationXWLoc, 1, GL_FALSE, &rotationXW[0][0]);
+		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+		glUniform3f(light2PosLoc, lightPos2.x, lightPos2.y, lightPos2.z);
+		glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+		glUniform1f(alphaLoc, a);
 
-		////single draw call for refractive rendering
-		////glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
-      		////glDrawElements(GL_LINES, 20 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
-
-      		////draw 5-cell using index buffer and 5 pass transparency technique from http://www.alecjacobson.com/weblog/?p=2750
-		////1st pass
-		//glDisable(GL_CULL_FACE);
-		//glDepthFunc(GL_LESS);
-		//float f = 0.75f;
-		//float origAlpha = 0.4f;	
-		//a = 0.0f;
-		//glUniform1f(alphaLoc, a);
+		//single draw call for refractive rendering
 		//glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+      		//glDrawElements(GL_LINES, 20 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
 
-		////2nd pass
-		//glEnable(GL_CULL_FACE);
-		//glCullFace(GL_FRONT);
-		//glDepthFunc(GL_ALWAYS);
-		//a = origAlpha * f;
-		//glUniform1f(alphaLoc, a);
-		//glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
-		//
-		////3rd pass
-		//glDepthFunc(GL_LEQUAL);
-		//a = (origAlpha - (origAlpha * f)) / (1.0f - (origAlpha * f));
-		//glUniform1f(alphaLoc, a);
-		//glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+      		//draw 5-cell using index buffer and 5 pass transparency technique from http://www.alecjacobson.com/weblog/?p=2750
+		//1st pass
+		glDisable(GL_CULL_FACE);
+		glDepthFunc(GL_LESS);
+		float f = 0.75f;
+		float origAlpha = 0.4f;	
+		a = 0.0f;
+		glUniform1f(alphaLoc, a);
+		glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
 
-		////4th pass
-		//glCullFace(GL_BACK);
-		//glDepthFunc(GL_ALWAYS);
-		//a = origAlpha * f;
-		//glUniform1f(alphaLoc, a);
-		//glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+		//2nd pass
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
+		glDepthFunc(GL_ALWAYS);
+		a = origAlpha * f;
+		glUniform1f(alphaLoc, a);
+		glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+		
+		//3rd pass
+		glDepthFunc(GL_LEQUAL);
+		a = (origAlpha - (origAlpha * f)) / (1.0f - (origAlpha * f));
+		glUniform1f(alphaLoc, a);
+		glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
 
-		////5th pass
-		//glDisable(GL_CULL_FACE);
-		//glDepthFunc(GL_LEQUAL);
-		//a = (origAlpha - (origAlpha * f)) / (1.0f - (origAlpha * f));
-		//glUniform1f(alphaLoc, a);
-		//glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+		//4th pass
+		glCullFace(GL_BACK);
+		glDepthFunc(GL_ALWAYS);
+		a = origAlpha * f;
+		glUniform1f(alphaLoc, a);
+		glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
 
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		//glBindVertexArray(0);
+		//5th pass
+		glDisable(GL_CULL_FACE);
+		glDepthFunc(GL_LEQUAL);
+		a = (origAlpha - (origAlpha * f)) / (1.0f - (origAlpha * f));
+		glUniform1f(alphaLoc, a);
+		glDrawElements(GL_TRIANGLES, 30 * sizeof(unsigned int), GL_UNSIGNED_INT, (void*)0);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 
 		// draw ground plane second 
 		glDepthFunc(GL_LESS);

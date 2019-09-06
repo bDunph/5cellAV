@@ -40,7 +40,7 @@ iQ24	init p23
 iQ25	init p24
 
 ; to simulate the shock between the excitator and the resonator
-ashock  mpulse  1,2
+ashock  mpulse  1,	2,	1
 
 aexc1	mode 	ashock,	ifreq11,	iQ11
 aexc1 = aexc1*iamp
